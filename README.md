@@ -1,6 +1,4 @@
 Demo
 ====
 
-Coolest demo yo!
-
-Yoy
+Evgeny Test
