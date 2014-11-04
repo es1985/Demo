@@ -10,6 +10,7 @@
   <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
 
   <script src="js/vendor/modernizr.js"></script>
+  <script src="js/vendor/ion.sound-2.1.3/ion.sound.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
 
@@ -37,12 +38,15 @@ JSON object to come out:
 
 <div class="row full-height">
 
+<!--
   <a id="clickable" onclick="javascript:game_manager.cat_clicked()" href="#" style='width: 100%;
   height: 44%;
   background: transparent;
   position: absolute;
   top: 200px;
   z-index: 1;'>
+
+-->
 </a>
 
 <div id="swiffycontainer" style="width:300px;height:300px;">
@@ -161,25 +165,33 @@ JSON object to come out:
 
   <a href="#" class="health-icon" id="numero1"><img id="health-image" src="img/health-icon.png"></a>
 
-  <div id="foodModal" class="reveal-modal" data-reveal>
-    <p class="lead"> <span class="food_sender_name"></span> <span id="text_with_food"></span></p>
-    <p class="food-type-cat"><img id="offered_food_image" src=""></p>
-    <div class="small-12 columns food-buttons-cat">
-      <button onclick="javascript:food_clicked(0)" class="red-x small-6 columns"><i class="fa fa-times"></i></button>
-      <button onclick="javascript:food_clicked(1)"class="green-y small-6 columns"><i class="fa fa-check"></i></button>
-    </div>
-    <!-- <a class="close-reveal-modal">&#215;</a> -->
-  </div>
+  <ul class="cat-actions">
+    <li class="cat-action cat-action-sleep"><button id="sleep_button" onclick="javascript:game_manager.sleep_clicked()"><i class="fa fa-moon-o"></i></button></li>
+    <li class="cat-action cat-action-scratch"><button><i class="fa fa-paw"></i></button></li>
+    <li class="cat-action cat-action-feedme"><a id="food_bowl_button" href="#" onclick="javascript:game_manager.food_bowl_button_clicked()"><img src="img/feedme.png"></a></li>
+  </ul>
+  
+  <a class="food-bowl" onclick="javascript:game_manager.food_bowl_clicked()" href="#"><img id="food-bowl-img" src="img/foodbal-empty.png"></a>
 
+<!--
   <button class="but human-feed">feed pips</button>
+-->
 
-      <!--
-        <div id="foodModal-approve" class="reveal-modal" data-reveal>
-          <p class="lead"><span id="yay"></span>  <span class="food_acceptor_name"></span> <span id="food_acceptor_text"></span><span id="foodModal-approve-points"></span></p>
-          <a class="close-reveal-modal">&#215;</a>
+      <!-- food modal -->
+      <div id="foodModal" class="reveal-modal" data-reveal>
+        <p class="lead"> <span class="food_sender_name"></span> <span id="text_with_food"></span></p>
+        <p class="food-type-cat"><img id="offered_food_image" src=""></p>
+        <div class="small-12 columns food-buttons-cat">
+         
+
+          <button onclick="javascript:food_clicked(0)" class="red-x small-6 columns"><i class="fa fa-times"></i></button>
+          <button onclick="javascript:food_clicked(1)"class="green-y small-6 columns"><i class="fa fa-check"></i></button>
+        
         </div>
-      -->
-
+        <!-- <a class="close-reveal-modal">&#215;</a> -->
+      </div>
+      <!-- food modal -->
+      <!-- food modal approve-->
       <div id="foodModal-approve" class="reveal-modal clearfix" data-reveal style=" opacity: 1; visibility: visible; top: 0px;padding:0px;">
         <div class="left" id="foodModal-approve-img"><img id="approve-img" src=""></img></div>
         <div class="left" id="first-left">
@@ -189,7 +201,9 @@ JSON object to come out:
         <div class="right"><span id="foodModal-approve-points"></span><span id="foodModal-approve-points-points">points</span></div>
         <a class="close-reveal-modal approval-close" id="">ok</a>
       </div>
+      <!-- food modal approve-->
 
+      <!-- landing modal -->
       <div id="landingModal" class="reveal-modal message-modal" data-reveal>
         <span class="landing-arrow-health"><img src="img/landind-modal-arrow.png"></span>
         <span class="landing-arrow-points"><img src="img/landind-modal-arrow.png"></span>
@@ -198,6 +212,7 @@ JSON object to come out:
         <p>You are Pips, a cat owned by Norman, a geeky computer engineer. In this demo you can and talk to Norman via emoticons and cat-chat. Take care to let Norman know when you are hungry and when to feed you!</p>
         <a class="close-reveal-modal landing-close" id="">&#215;</a>
       </div>
+      <!-- landing modal -->
 
       <!-- level modal -->
       <div id="levelModal" class="message-modal level-modal reveal-modal" data-reveal>
@@ -213,7 +228,7 @@ JSON object to come out:
       <!--<a href="#" class="the-cat"><img id="cat_avatar" src="img/cat.png"></a>-->
 
 
-      <a href="#" onclick="javascript:game_manager.change_chat_status()" class="chat-trigger" data-dropdown="chat-drop" data-options="align: top" aria-controls="drop2" aria-expanded="false"><img src="img/chat-trigger-cat.png">
+      <a href="#" onclick="javascript:game_manager.chat_clicked()" class="chat-trigger" data-dropdown="chat-drop" data-options="align: top" aria-controls="drop2" aria-expanded="false"><img src="img/chat-trigger-cat.png">
         <span id="numero2" class="chat-notifications"></span>
       </a>
 
@@ -223,34 +238,38 @@ JSON object to come out:
         <ul class="chat-thread">
         </ul>
 
-
-
         <form id="in-chat-input" onsubmit="text_submitted()" action="#"> 
           <div class="row">
             <div class="small-12 columns">
+            
               <ul class="emoticons-slider" data-orbit>
-                <li>
+                <!--
+                <li class="three-emoticons">
                   <ul class="small-block-grid-3">
                     <li onclick="javascript:emoticon_clicked('emo-happy')" class="chat-cat-emoticon"><img src="img/emoticons/emo-happy.png" alt="slide 1" /></li>
                     <li onclick="emoticon_clicked('emo-love')" class="chat-cat-emoticon"><img src="img/emoticons/emo-love.png" alt="slide 1" /></li>
                     <li onclick="emoticon_clicked('emo-kania')" class="chat-cat-emoticon"><img src="img/emoticons/emo-kania.png" alt="slide 1" /></li>
                   </ul>
                 </li>
-                <li>
+           
+                <li class="three-emoticons">
                   <ul class="small-block-grid-3">
                     <li onclick="javascript:emoticon_clicked('emo-hipster')" class="chat-cat-emoticon"><img src="img/emoticons/emo-hipster.png" alt="slide 1" /></li>
                     <li onclick="javascript:emoticon_clicked('emo-food')" class="chat-cat-emoticon"><img src="img/emoticons/emo-food.png" alt="slide 1" /></li>
                     <li onclick="javascript:emoticon_clicked('emo-pilot')" class="chat-cat-emoticon"><img src="img/emoticons/emo-pilot.png" alt="slide 1" /></li>
                   </ul>
                 </li>
-                <li>
+
+                <li class="three-emoticons">
                   <ul class="small-block-grid-3">
                     <li onclick="javascript:emoticon_clicked('emo-worried')" class="chat-cat-emoticon"><img src="img/emoticons/emo-worried.png" alt="slide 1" /></li>
                     <li onclick="javascript:emoticon_clicked('emo-mad')" class="chat-cat-emoticon"><img src="img/emoticons/emo-mad.png" alt="slide 1" /></li>
                     <li onclick="javascript:emoticon_clicked('emo-night')" class="chat-cat-emoticon"><img src="img/emoticons/emo-night.png" alt="slide 1" /></li>
                   </ul>
                 </li>
+              -->
               </ul>
+
             </div>
             <div class="large-12 columns">
               <div class="row collapse">
@@ -272,6 +291,7 @@ JSON object to come out:
   <script src="js/foundation/foundation.dropdown.js"></script>
   <script src="js/foundation/foundation.orbit.js"></script>
   <script src="js/foundation/foundation.reveal.js"></script>
+  
 
   <script>
   $(document).foundation('');
@@ -285,12 +305,14 @@ JSON object to come out:
   $(document).ready(game_manager.onload_game());
 
 
+   
+
   var txt = '{"sender":"BB Netanyahu","text":"ZOOOOOooooonk", "notification":"1"}';
     //game_manager.read_j(txt);
     var txt2 = '{"sender":"Sarah Netanyahu","emoticon":"happy", "score":"2"}';
     // game_manager.read_j(txt2);
-    var txt3 = '{"sender":"BB Netanyahu","food_offered":"1"}';
-     //game_manager.read_j(txt3);
+    var txt3 = '{"sender":"BB Netanyahu","food_sent":"1"}';
+     game_manager.read_j(txt3);
      var txt4 = '{"sender":"BB Netanyahu","food_accepted":1}';
      //game_manager.read_j(txt4);
 
