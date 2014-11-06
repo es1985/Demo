@@ -12,6 +12,7 @@ var game_manager =
   chat_opened:0,
   other_player_name:"Norman",
   current_emoticons:[],
+  possible_emoticon_list:[],
   notifications:0,
   dead:0,
   health_timer:{},
@@ -23,10 +24,20 @@ var game_manager =
   socket:{},
   cat_sleep:0,
   cat_stage:"swiffycontainer",
+  cat_hidden_stage:"swiffycontainer2",
+  cat_hidden_stage2:"swiffycontainer3",
+  fish_stage:"fish-swiffy",
   head_clicked:0,
   belly_clicked:0,
   food_bowl_opened:0,
   food_at_bowl:0,
+  normal_mode:1,
+  new_emoticon_pack:[],
+  fish_there:0,
+  scratching:0,
+  displayed_cat_stage:"swiffycontainer",
+  
+
 
   read_j: function(txt)
   {
@@ -56,17 +67,28 @@ food_bowl:0,1
 sent_sound: name of sound that was sent 
 food_sent: type of food sent to food bowl (0 if nothing)
 food_eaten:1 if food was eaten
+general_animation_loop: string - put an animation
+animation_stage: string - animation's stage
+fish_there: 1,0 - change fish status
+function_w_anim1
+function_w_anim2
+timer_stop: name of the stage where the timer should stop
+change_displayed_cat_stage_from: name of the stage to display
+change_displayed_cat_stage_to: 
 }
 */
 
   var jason = JSON.parse(txt);
 
-    if(!jason.sender || jason.cat_sender===undefined)
+    if(!jason.sender )// || jason.cat_sender===undefined)
     {
       document.write("ERROR - NO SENDER");
     }
 
-
+    if (jason.timer_stop) // ---- IMPORTANT!!!! HAS TO BE FIRST!!!
+    {
+      animation_manager.stop_timer(jason.timer_stop);
+    }
 
     if (jason.text)
     {
@@ -119,12 +141,22 @@ food_eaten:1 if food was eaten
 
     if(jason.cat_animation_loop)
     {
-      this.put_animaiton_loop(jason.cat_animation_loop);
+      this.put_animaiton_loop(jason.cat_animation_loop,jason.sent_sound,this.cat_stage);
+    }
+
+    if(jason.general_animation_loop && jason.animation_stage)
+    {
+      this.put_animaiton_loop(jason.general_animation_loop,jason.sent_sound,jason.animation_stage);
     }
 
     if(jason.cat_anim1 && jason.cat_anim2 && jason.time_between_animations)
     {
-      this.put_animaiton_plus_loop(jason.cat_anim1,jason.cat_anim2,jason.time_between_animations,jason.sent_sound);
+      this.put_animaiton_plus_loop(jason.cat_anim1,jason.cat_anim2,jason.time_between_animations,this.cat_stage,jason.sent_sound,jason.sent_sound2,jason.function_w_anim1,jason.function_w_anim2);
+     }
+
+    if (jason.normal_mode>=1 || jason.normal_mode===0)
+    {
+      this.normal_mode=jason.normal_mode;
     }
 
     if(jason.dead)
@@ -132,6 +164,11 @@ food_eaten:1 if food was eaten
       this.dead=1;
       this.score=0;
       this.level=0;
+    }
+
+    if (jason.fish_there>=1 || jason.fish_there===0)
+    {
+     this.fish_there=jason.fish_there;
     }
 
     if (jason.dead===0)
@@ -146,13 +183,20 @@ food_eaten:1 if food was eaten
     
     if (jason.head_clicked==1 || jason.head_clicked===0)
     {
-     // this.head_caress(jason.head_clicked,jason.cat_sender);
+      //this.head_caress(jason.head_clicked,jason.cat_sender);
     }
 
     if (jason.food_bowl)
     {
       this.open_close_food_bowl();
     }
+
+    if (jason.change_displayed_cat_stage_from && jason.change_displayed_cat_stage_to)
+    {
+
+      this.change_cat_display(jason.change_displayed_cat_stage_from,jason.change_displayed_cat_stage_to);
+    }
+
   },
 
   onload_game: function()
@@ -163,7 +207,26 @@ food_eaten:1 if food was eaten
       this.socket = io();
     }
 
-    //$(".human-feed").hide(); 
+
+
+
+  /*
+    var to_loader={
+  "files": [{
+    "source": "js/animation_manager.js",
+    "type": "SCRIPT",
+    "size": 161455,
+    "stopExecution": false
+  }, 
+    ]};
+
+    $.html5Loader({
+      filesToLoad: to_loader, // this could be a JSON or simply a javascript object
+    });
+
+    */
+
+ 
     $('#points-drop').hide();
 
 // ---- > Prevent the form refresh thing
@@ -179,7 +242,7 @@ food_eaten:1 if food was eaten
     this.update_health(1);
     this.listen_to_json();
     this.update_notifications();
- 
+    this.possible_emoticon_list=get_possible_emoticons();
 
  // ----- > MODALS
 
@@ -202,6 +265,11 @@ food_eaten:1 if food was eaten
       { 
         game_manager.progress_cue();
       });
+    $('#levelgiftModal').bind('closed', function() 
+      { 
+        game_manager.progress_cue();
+      });
+    
 
 
 // ------ > Configure for Human/Cat
@@ -214,8 +282,6 @@ food_eaten:1 if food was eaten
     {
       this.configure_for_human(); 
     }
-
- 
 
 
 // ------ > SOUND
@@ -256,6 +322,30 @@ food_eaten:1 if food was eaten
     game_manager.chat_opened=0;
    });
 
+    //$('#clickable').mousemove.preventDefault();
+
+    $('#swiffycontainer2').hide();
+    $('#swiffycontainer3').hide();
+    animation_manager.play_anim_loop("wanting_caress",this.cat_hidden_stage);
+    animation_manager.play_anim_loop("caressing_going_on",this.cat_hidden_stage2);
+    $('#clickable').mousedown(function() {
+
+    game_manager.cat_click_down();
+
+    });
+
+    $('#clickable').mouseup(function() {
+    game_manager.cat_click_up();
+    });
+
+/*
+    $('#clickable').click(function() {
+
+    game_manager.cat_clicked();
+
+    });
+    
+*/
   },
 
   configure_for_human: function()
@@ -288,11 +378,19 @@ food_eaten:1 if food was eaten
   sleep_clicked: function()
   {
     var sleep=1;
+    var normal=0;
     var anim="sleeping_cat";
+    var bowl_close=0;
     if (this.cat_sleep)
     {
       sleep=0;
+      normal=1;
       anim="cat_breathing";
+    }
+
+    if (this.food_bowl_opened && sleep)
+    {
+      bowl_close=1;
     }
      var sender_dude=game_manager.get_player_name();
       var jesson =
@@ -300,6 +398,8 @@ food_eaten:1 if food was eaten
     sender:sender_dude,
     cat_sleep:sleep,
     cat_animation_loop:anim,
+    food_bowl:bowl_close,
+    normal_mode:normal,
     cat_sender:this.cat,
 
   };
@@ -314,21 +414,140 @@ food_eaten:1 if food was eaten
   },
   
 
-  head_click_down: function(caress,cat)
+  cat_click_down: function()
   {
-    /*
-      var cat_human= Boolean(cat && this.head_human_clicked);
-      var human_cat= Boolean(!cat && this.head_cat_clicked);      
-      if (cat_human || human_cat)
-      {
 
+
+    if(this.normal_mode)
+    {
+      var normal=0;
+     switch(this.head_clicked)
+     {
+        case 0:
+        /*
+        var caress_anim="wanting_caress";
+        var after_caressing="cat_breathing";
+        var caressing_time=10000;
+        var caressing_sound="";
+        var post_caressing_sound="";
+        var function_at_start="caressing_proposed";
+        var function_at_end="caressing_turned_down";
+        */
+
+        var stage_from=this.displayed_cat_stage;
+        var stage_to=this.cat_hidden_stage;
+        var head_clicking=1;
+        break;  
+
+        case 1:
+        /*
+        var caress_anim="caressing_going_on";
+        var after_caressing="cat_breathing";
+        var caressing_time=10000;
+        var caressing_sound="";
+        var post_caressing_sound="";
+        var function_at_start="caressing_begin";
+        var function_at_end="caressing_end";
+        */
+        var stage_from=this.displayed_cat_stage;
+        var stage_to=this.cat_hidden_stage2;
+        var head_clicking=2;
+        break;
+
+        case 2:
+        break;
+     }
+
+     var sender_dude=game_manager.get_player_name();
+      var jesson =
+      {
+       sender:sender_dude,
+       cat_sender:this.cat,
+       normal_mode:normal,
+       /*
+       cat_anim1:caress_anim,
+       cat_anim2:after_caressing,
+       time_between_animations:caressing_time,
+       sent_sound:caressing_sound,
+       sent_sound2:post_caressing_sound,
+       function_w_anim1:function_at_start,
+       function_w_anim2:function_at_end,
+       head_clicked:head_clicking,
+       timer_stop:this.cat_stage,
+       */
+       change_displayed_cat_stage_from:stage_from,
+       change_displayed_cat_stage_to:stage_to,
       }
-    */
+
+      var  txt = JSON.stringify(jesson);
+  if(game_manager.is_local())
+  {
+    game_manager.read_j(txt);
+  }
+  game_manager.send_j(txt);
+
+  } 
   },
 
-   head_click_up: function(caress,cat)
+   cat_click_up: function()
    {
 
+    //alert("UP");
+    // jason.cat_animation_loop,jason.sent_sound
+    
+      var sender_dude=game_manager.get_player_name();
+      var jesson =
+      {
+       sender:sender_dude,
+       cat_sender:this.cat,
+       normal_mode:1,
+       
+       /*
+       cat_animation_loop:"cat_breathing",
+       sent_sound:"",
+       head_clicked:0,
+       timer_stop:this.cat_stage,
+       */
+       change_displayed_cat_stage_from:this.cat_hidden_stage,
+       change_displayed_cat_stage_to:this.cat_stage,
+      }
+
+      var  txt = JSON.stringify(jesson);
+      if(game_manager.is_local())
+      {
+        game_manager.read_j(txt);
+      }
+      game_manager.send_j(txt);
+      
+   },
+
+   caressing_begin: function()
+   {
+
+   },
+
+   caressing_end: function()
+   {
+    alert("ending");
+   },
+
+   caressing_proposed: function()
+   {
+    
+   },
+
+   caressing_turned_down: function()
+   {
+     alert("turned down");
+   },
+
+   change_cat_display: function(stage_from,stage_to)
+   {
+    var id="#"+stage_from;
+    var id2="#"+stage_to;
+    $(id).hide();
+    $(id2).show();
+    this.displayed_cat_stage=stage_to;
    },
 
    open_close_food_bowl: function()
@@ -429,7 +648,7 @@ update_emoticon_html: function()
       dumdum=2;
       break;
       case 2:
-      dumdum=0
+      dumdum=0;
       break;
     }
   }
@@ -451,9 +670,13 @@ emoti_cont=emoti_cont+' </ul></li>';
 $(".emoticons-slider").append(emoti_cont);
 },
 
-put_animaiton_loop: function(anim,sent_sound)
+put_animaiton_loop: function(anim,sent_sound,stage)
   {
-    animation_manager.play_anim_loop(anim,this.cat_stage,sent_sound);
+    if (stage===undefined)
+    {
+      stage=this.cat_stage;
+    }
+      animation_manager.play_anim_loop(anim,stage,sent_sound);
   },
 
 
@@ -477,10 +700,16 @@ put_animaiton_loop: function(anim,sent_sound)
       this.send_j(txt);
   },
 
-  put_animaiton_plus_loop: function(anim1,anim2,time_str,sent_sound)
+  put_animaiton_plus_loop: function(anim1,anim2,time_str,stage,sent_sound1,sent_sound2,function1,function2)
   {
+    //   this.put_animaiton_plus_loop(cat_anim1,jason.cat_anim2,jason.time_between_animations,this.cat_stage,jason.sent_sound,jason.sent_sound2,jason.function_w_anim1,jason.function_w_anim2);
+    
+    if (stage===undefined)
+    {
+      stage=this.cat_stage;
+    }
     time=Number(time_str);
-    animation_manager.play_anim_and_loop(anim1,anim2,time,this.cat_stage,sent_sound);
+    animation_manager.play_anim_and_loop(anim1,anim2,time,stage,sent_sound1,sent_sound2,function1,function2);
      
   },
 
@@ -507,13 +736,52 @@ put_animaiton_loop: function(anim,sent_sound)
       this.send_j(txt);
   },
 
-  cat_clicked: function()
+  cat_clicked: function() // DEPRECIATED !!!!! ! !!!! !! 
   {
     if (!this.dead)
     {
       //ion.sound.play("water_droplet");
       this.send_animation_plus_loop('eyes_twitch','cat_breathing',1000,"water_droplet");
     }
+  },
+
+
+  scratch_clicked: function()
+  {
+    if (this.normal_mode)
+    {
+      var sender_dude=game_manager.get_player_name();
+      var jesson =
+  {
+    sender:sender_dude,
+    cat_anim1:"scratching_animation",
+    cat_anim2:"cat_breathing",
+    time_between_animations:7000,
+    normal_mode:0,
+    function_w_anim1:"scratch_begin",
+    function_w_anim2:"scratch_end",
+    cat_sender:this.cat,
+  };
+
+  txt=JSON.stringify(jesson);
+
+    if(this.local)
+      {  
+        this.read_j(txt);
+      }
+
+      this.send_j(txt); 
+    }
+  },
+
+  scratch_begin: function()
+  {
+    alert("scratch");
+  },
+
+   scratch_end: function()
+  {
+    alert("end scratch");
   },
 
   cat_ate_food: function(accept,sender)
@@ -825,6 +1093,7 @@ put_animaiton_loop: function(anim,sent_sound)
         sender:sender_dude,
         nu_health:new_health,
         dead:0,
+        normal_mode:1,
         cat_animation_loop:"cat_breathing",
         cat_sender:this.cat,
       }
@@ -927,6 +1196,7 @@ put_animaiton_loop: function(anim,sent_sound)
         sender:sender_dude,
         cat_animation_loop:"sick_cat",
        dead:1,
+       normal:0,
        cat_sender:this.cat,
       };
 
@@ -984,7 +1254,78 @@ put_animaiton_loop: function(anim,sent_sound)
     //$('#levelModal').foundation('reveal', 'open');
     this.add_modal('#levelModal');
     this.level_modal_open=1;
+    this.new_level_logic();
   },
+
+  new_level_logic: function()
+  {
+    switch (this.level)
+    {
+      case 1:
+      if (this.cat)
+      {
+        this.adjust_modal_to_choose_emoticons();        
+        this.add_modal('#levelgiftModal');
+      }
+      break;
+
+      case 2:
+
+      this.add_modal('#fish-gift-modal');
+
+      var sender_dude=game_manager.get_player_name();
+      var jesson =
+      {
+        sender:sender_dude,
+        general_animation_loop:"fish_regular",
+        animation_stage:"fish-swiffy",
+        fish_there:1,
+        cat_sender:this.cat,
+      };
+
+    txt=JSON.stringify(jesson);
+
+    if(this.local)
+      {  
+        game_manager.read_j(txt);
+      }
+
+      game_manager.send_j(txt);
+
+      break;
+
+      case 3:
+
+      break;
+    }
+  },
+
+  adjust_modal_to_choose_emoticons: function()
+  {
+    for(i = 0; i < this.possible_emoticon_list.length; i++)
+    {
+      if(this.current_emoticons.indexOf(this.possible_emoticon_list[i])<0)
+      {
+        
+        var emoticon_choice='<li class="emoticon-choice" ><img id="emoticon-choice-'+this.possible_emoticon_list[i]+'" onclick="javascript:game_manager.emoticon_chosen(&#39'+this.possible_emoticon_list[i]+'&#39)" src="'+get_emoticon_file(this.possible_emoticon_list[i])+'"></li>';
+        $("#choose_new_emoticons_area").append(emoticon_choice);
+      }
+    }
+  },
+
+  emoticon_chosen: function(emoti_chosen)
+  {
+    this.new_emoticon_pack.push(emoti_chosen);
+    if (this.new_emoticon_pack.length==3)
+    {
+      this.add_emoticons(this.new_emoticon_pack);
+      this.new_emoticon_pack=[];
+      $('#levelgiftModal').foundation('reveal', 'close');
+    }
+    var idee="#emoticon-choice-"+emoti_chosen;
+    $(idee).addClass("emoticon-chosen");
+  },
+
 
   close_all: function() // DEPRECIATED. FOR NOW NO USE WHATSOEVER!!!
   {
@@ -1088,6 +1429,14 @@ function get_emoticon_file(txt)
   } 
 };
 
+function get_possible_emoticons()
+{
+  var possible_emoticon_list=["emo-happy","emo-love","emo-dayan","emo-hipster","emo-kania","emo-mad","emo-night","emo-pilot","emo-worried","emo-food"];
+  return(possible_emoticon_list);
+};
+
+
+
 function get_food_file(txt,at_bowl)
 {
   if(at_bowl)
@@ -1173,6 +1522,7 @@ function emoticon_clicked(emoti)
     cat_sender:game_manager.cat,
   };
   var  txt = JSON.stringify(jesson);
+
   if(game_manager.is_local())
   { 
    game_manager.read_j(txt);
