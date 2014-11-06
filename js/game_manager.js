@@ -181,9 +181,9 @@ change_displayed_cat_stage_to:
       this.change_sleep(jason.cat_sleep);
     }
     
-    if (jason.head_clicked==1 || jason.head_clicked===0)
+    if (jason.head_clicked>=1 || jason.head_clicked===0)
     {
-      //this.head_caress(jason.head_clicked,jason.cat_sender);
+      this.head_clicked=jason.head_clicked;
     }
 
     if (jason.food_bowl)
