@@ -420,24 +420,12 @@ change_displayed_cat_stage_to:
     if(this.normal_mode)
     {
       var normal=0;
-     switch(this.head_clicked)
+     if(this.head_clicked)
      {
-        case 0:
-        /*
-        var caress_anim="wanting_caress";
-        var after_caressing="cat_breathing";
-        var caressing_time=10000;
-        var caressing_sound="";
-        var post_caressing_sound="";
-        var function_at_start="caressing_proposed";
-        var function_at_end="caressing_turned_down";
-        */
-        var stage_from=this.displayed_cat_stage;
-        var stage_to=this.cat_hidden_stage;
-        var head_clicking=1;
-        break;  
-
-        case 1:
+      var stage_from=this.displayed_cat_stage;
+        var stage_to=this.cat_hidden_stage2;
+        var head_clicking=2;
+        console.log("stage_toZZZZ");
         /*
         var caress_anim="caressing_going_on";
         var after_caressing="cat_breathing";
@@ -447,12 +435,22 @@ change_displayed_cat_stage_to:
         var function_at_start="caressing_begin";
         var function_at_end="caressing_end";
         */
+      }
+      else
+      {
         var stage_from=this.displayed_cat_stage;
-        var stage_to=this.cat_hidden_stage2;
-        var head_clicking=2;
-        console.log("stage_toZZZZ");
-        break;
-     };
+        var stage_to=this.cat_hidden_stage;
+        var head_clicking=1;
+        /*
+        var caress_anim="wanting_caress";
+        var after_caressing="cat_breathing";
+        var caressing_time=10000;
+        var caressing_sound="";
+        var post_caressing_sound="";
+        var function_at_start="caressing_proposed";
+        var function_at_end="caressing_turned_down";
+        */
+     }
 
      var sender_dude=game_manager.get_player_name();
       var jesson =
