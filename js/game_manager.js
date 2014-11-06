@@ -453,6 +453,7 @@ change_displayed_cat_stage_to:
         var stage_to=this.cat_hidden_stage2;
         var head_clicking=2;
 
+
         console.log(stage_to);
         break;
 
@@ -474,9 +475,9 @@ change_displayed_cat_stage_to:
        sent_sound2:post_caressing_sound,
        function_w_anim1:function_at_start,
        function_w_anim2:function_at_end,
-       head_clicked:head_clicking,
        timer_stop:this.cat_stage,
        */
+       head_clicked:head_clicking,
        change_displayed_cat_stage_from:stage_from,
        change_displayed_cat_stage_to:stage_to,
       }
