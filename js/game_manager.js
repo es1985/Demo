@@ -184,7 +184,6 @@ change_displayed_cat_stage_to:
     if (jason.head_clicked>=1 || jason.head_clicked===0)
     {
       this.head_clicked=jason.head_clicked;
-      console.log("ZZZZZ "+jason.head_clicked);
     }
 
     if (jason.food_bowl)
@@ -419,13 +418,14 @@ change_displayed_cat_stage_to:
   {
     if(this.normal_mode)
     {
+      console.log("Bing "+this.head_clicked);
       var normal=0;
      if(this.head_clicked)
      {
-      var stage_from=this.displayed_cat_stage;
+        console.log("UUUUUUUUU "+this.head_clicked);
+        var stage_from=this.displayed_cat_stage;
         var stage_to=this.cat_hidden_stage2;
         var head_clicking=2;
-        console.log("stage_toZZZZ");
         /*
         var caress_anim="caressing_going_on";
         var after_caressing="cat_breathing";
@@ -472,7 +472,6 @@ change_displayed_cat_stage_to:
        change_displayed_cat_stage_from:stage_from,
        change_displayed_cat_stage_to:stage_to,
       };
-      console.log(head_clicking);
 
       var  txt = JSON.stringify(jesson);
       if(game_manager.is_local())
@@ -543,7 +542,6 @@ change_displayed_cat_stage_to:
     $(id).hide();
     $(id2).show();
     this.displayed_cat_stage=stage_to;
-    console.log(id2);
    },
 
    open_close_food_bowl: function()
