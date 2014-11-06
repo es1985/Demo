@@ -325,7 +325,7 @@ change_displayed_cat_stage_to:
     //$('#clickable').mousemove.preventDefault();
 
     $('#swiffycontainer2').hide();
-    $('#swiffycontainer3').hide();
+    //$('#swiffycontainer3').hide();
     animation_manager.play_anim_loop("wanting_caress",this.cat_hidden_stage);
     animation_manager.play_anim_loop("caressing_going_on",this.cat_hidden_stage2);
     $('#clickable').mousedown(function() {
