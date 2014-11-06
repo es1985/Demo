@@ -184,6 +184,7 @@ change_displayed_cat_stage_to:
     if (jason.head_clicked>=1 || jason.head_clicked===0)
     {
       this.head_clicked=jason.head_clicked;
+      console.log("ZZZZZ "+jason.head_clicked);
     }
 
     if (jason.food_bowl)
@@ -434,7 +435,6 @@ change_displayed_cat_stage_to:
         var stage_from=this.displayed_cat_stage;
         var stage_to=this.cat_hidden_stage;
         var head_clicking=1;
-        console.log(stage_to);
         break;  
 
         case 1:
@@ -473,7 +473,8 @@ change_displayed_cat_stage_to:
        head_clicked:head_clicking,
        change_displayed_cat_stage_from:stage_from,
        change_displayed_cat_stage_to:stage_to,
-      }
+      };
+      console.log(head_clicking);
 
       var  txt = JSON.stringify(jesson);
       if(game_manager.is_local())
