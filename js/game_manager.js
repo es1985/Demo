@@ -450,7 +450,7 @@ change_displayed_cat_stage_to:
         var stage_from=this.displayed_cat_stage;
         var stage_to=this.cat_hidden_stage2;
         var head_clicking=2;
-        console.log(stage_to);
+        console.log("stage_toZZZZ");
         break;
      };
 
@@ -544,6 +544,7 @@ change_displayed_cat_stage_to:
     $(id).hide();
     $(id2).show();
     this.displayed_cat_stage=stage_to;
+    console.log(id2);
    },
 
    open_close_food_bowl: function()
