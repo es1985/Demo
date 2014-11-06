@@ -416,7 +416,7 @@ change_displayed_cat_stage_to:
 
   cat_click_down: function()
   {
-    if(this.normal_mode)
+    if(this.normal_mode || this.head_clicked>0)
     {
       console.log("Bing "+this.head_clicked);
       var normal=0;
