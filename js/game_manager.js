@@ -504,13 +504,12 @@ change_displayed_cat_stage_to:
        sender:sender_dude,
        cat_sender:this.cat,
        normal_mode:1,
-       
        /*
        cat_animation_loop:"cat_breathing",
        sent_sound:"",
-       head_clicked:0,
        timer_stop:this.cat_stage,
        */
+       head_clicked:0,
        change_displayed_cat_stage_from:this.cat_hidden_stage,
        change_displayed_cat_stage_to:this.cat_stage,
       }
