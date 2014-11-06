@@ -416,8 +416,6 @@ change_displayed_cat_stage_to:
 
   cat_click_down: function()
   {
-
-
     if(this.normal_mode)
     {
       var normal=0;
@@ -433,10 +431,10 @@ change_displayed_cat_stage_to:
         var function_at_start="caressing_proposed";
         var function_at_end="caressing_turned_down";
         */
-
         var stage_from=this.displayed_cat_stage;
         var stage_to=this.cat_hidden_stage;
         var head_clicking=1;
+        console.log(stage_to);
         break;  
 
         case 1:
@@ -452,14 +450,9 @@ change_displayed_cat_stage_to:
         var stage_from=this.displayed_cat_stage;
         var stage_to=this.cat_hidden_stage2;
         var head_clicking=2;
-
-
         console.log(stage_to);
         break;
-
-        case 2:
-        break;
-     }
+     };
 
      var sender_dude=game_manager.get_player_name();
       var jesson =
@@ -483,16 +476,17 @@ change_displayed_cat_stage_to:
       }
 
       var  txt = JSON.stringify(jesson);
-  if(game_manager.is_local())
-  {
-    game_manager.read_j(txt);
-  }
-  game_manager.send_j(txt);
+      if(game_manager.is_local())
+     {
+       game_manager.read_j(txt);
+     }
+     game_manager.send_j(txt);
 
-  } 
+    } 
   },
 
-   cat_click_up: function()
+
+  cat_click_up: function()
    {
 
     //alert("UP");
