@@ -418,11 +418,10 @@ change_displayed_cat_stage_to:
   {
     if(this.normal_mode || this.head_clicked>0)
     {
-      console.log("Bing "+this.head_clicked);
+     
       var normal=0;
      if(this.head_clicked)
      {
-        console.log("UUUUUUUUU "+this.head_clicked);
         var stage_from=this.displayed_cat_stage;
         var stage_to=this.cat_hidden_stage2;
         var head_clicking=2;
@@ -502,7 +501,7 @@ change_displayed_cat_stage_to:
        timer_stop:this.cat_stage,
        */
        head_clicked:0,
-       change_displayed_cat_stage_from:this.cat_hidden_stage,
+       change_displayed_cat_stage_from:this.displayed_cat_stage,
        change_displayed_cat_stage_to:this.cat_stage,
       }
 
