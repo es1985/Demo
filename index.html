@@ -1,82 +1,181 @@
-<!doctype html>
-<html class="no-js" lang="en">
+<!DOCTYPE html>
+<html class="no-js" lang="en" id="games">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>pips demo</title>
-  <link href='http://fonts.googleapis.com/css?family=Chewy' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="css/foundation.css" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
-  <script src="js/vendor/modernizr.js"></script>
-  <script src="https://www.gstatic.com/swiffy/v7.0/runtime.js"></script>
-  <meta name="viewport" content="minimal-ui">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <script type="text/javascript">
-  //document.domain="178.62.30.161";
-  </script>
-  <script>
-  function clicked(choice)
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>pips demo</title>
+
+<link href='https://fonts.googleapis.com/css?family=Chewy' rel='stylesheet' type='text/css'>
+<link rel="stylesheet" href="css/foundation.css" />
+<link rel="stylesheet" href="css/style.css" />
+<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet">
+<script src="js/vendor/modernizr.js"></script>
+<script src="https://www.gstatic.com/swiffy/v7.0/runtime.js"></script>
+<meta name="viewport" content="minimal-ui">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes" />
+
+<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+
+<script src="//connect.facebook.net/en_US/sdk.js"></script> 
+<script src="js/social.js"></script>
+<script>
+
+window.fbAsyncInit = function() 
+{
+  FB.init(
   {
-    localStorage.setItem("is_cat", choice);
+    appId      : 750038908425242,
+    cookie     : true,  // enable cookies to allow the server to access 
+                        // the session
+    xfbml      : true,  // parse social plugins on this page
+    frictionlessRequests: true,
+    status: true,
+    version    : 'v2.1' // use version 2.1
+  });
+
+  FB.getLoginStatus(function(response) {
+    statusChangeCallback(response);
+  });
+
+};
+
+  // Load the SDK asynchronously
+  (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0];
+    if (d.getElementById(id)) return;
+    js = d.createElement(s); js.id = id;
+    js.src = "//connect.facebook.net/en_US/sdk.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  function get_user_data_from_fb_api() {
+    //console.log('Getting user data from FB API... ');
+
+    FB.api('/me', function(response) {
+      console.log('Successful login for: ' + response.name);
+       getMe(writeMe);
+      // getPermissions(writePerm);
+      getFriendsInGame(putFriendsInGame);
+      getInvitableFriends(putInvitableFriends);
+   //     document.getElementById('status').innerHTML = 'Thanks for logging in, ' + response.name + '!';
+    });
+    
   }
 
-  function on_ready()
-  {
-    $(".choose-cat").click(function(){
-      $("#div2").fadeOut("slow");
-      $("#go-on").delay( 700 ).fadeIn("slow");
-    });
+  function statusChangeCallback(response) {
+ console.log('Wongo! AAAAHHHHH');
+    //console.log('statusChangeCallback');
+    console.log(response);
 
-    $(".choose-human").click(function(){
-      $("#anim").delay( 200 ).fadeOut("slow");
-      $("#go-on").delay( 1000 ).fadeIn("slow");
-    });
+     if (response.status === 'connected') {
+      // Logged into your app and Facebook.
+      put_games_screen();
+      get_user_data_from_fb_api();
+    } else if (response.status === 'not_authorized') {
+      // The person is logged into Facebook, but not your app.
+
+      put_login();
+
+
+    } else {
+      // The person is not logged into Facebook, so we're not sure if
+      // they are logged into this app or not.
+      put_login();
+
+    }
+    
   }
-  </script>
+
+
+</script>
+
 </head>
+<body>
 
-<body class="choose">     
-  <div class="row full-height">
+
+<div id="login_thing" class="row full-height index-inviter-login" style="display:none">
     <div class="small-12 columns full-height">
       <h1 class="choose-title">pips</h1>
-      <ul class="choose-character">
-        <li><p class="choose-cat" onclick="clicked(1)" id="anim" style="position:auto;"><img src="img/choose-cat.png"></p></li>
-        <li><p class="choose-human" onclick="clicked(0)" id="div2"><img src="img/choose-man.png"></p></li>
-        <li class="text-center" style="display:none;" id="go-on"><a class="go-on-pips" href="game.html?#">come on pips</a></li>
-      </ul>
+      <button class="small-12 columns login-facebook" id="login-try" onclick="login_try()">Login with Facebook</button>
     </div>
   </div>
-  <script src="js/vendor/jquery.js"></script>
-  <script src="js/foundation/foundation.js"></script>
-  <script src="js/foundation/foundation.dropdown.js"></script>
-  <script src="js/foundation/foundation.orbit.js"></script>
-  <script src="js/foundation/foundation.reveal.js"></script>
 
-  <script>
-  $(document).foundation();
-  </script>
 
-  <script>
-  $(document).ready(function(){on_ready();});
-  </script>
-  <script>
-function hideAddressBar()
-{
-  if(!window.location.hash)
-  {
-      if(document.height < window.outerHeight)
-      {
-          document.body.style.height = (window.outerHeight + 50) + 'px';
-      }
- 
-      setTimeout( function(){ window.scrollTo(0, 1); }, 50 );
-  }
-}
- 
-window.addEventListener("load", function(){ if(!window.pageYOffset){ hideAddressBar(); } } );
-window.addEventListener("orientationchange", hideAddressBar );
-  </script>
+<a href="#" onclick="on_invite()"> INVITE </a>
+
+
+<div id="games_screen" class="row" style="display:none">
+    <div class="small-12 columns games">
+      <h1 class="choose-title">pips</h1>
+      <h2 class="start-games">You have <span class"game-left-count">3</span> invitations left!</h2>
+      <h2 class="start-games">start a game</h2>
+      <ul id="char_choose" class="choose-character inline-list" style="display:none">
+        <li><p class="choose-cat" onclick="char_chosen(1)" id="anim" style="position:auto;"><img src="img/choose-cat.png"></p></li>
+        <li><p class="choose-human" onclick="char_chosen(0)" id="div2"><img src="img/choose-man.png"></p></li>
+      </ul>
+
+    <ul id="available_friends_list" class="games-list small-12 columns">
+        <li class="row games-list-head">Start A Game!</li>
+      
+      </ul>
+
+      <ul id="invite_list" class="games-list small-12 columns">
+        <li class="row games-list-head">Invite These Friends</li>
+      
+      </ul>
+
+      <!--
+
+      <ul class="games-list small-12 columns">
+        <li class="row games-list-head">Games</li>
+        <li class="game-list-game row clearfix">
+          <a class="games-list-partner-avatar left" href=""><img src=""></a>
+          <a class="games-list-partner-name left" href="">uri hamster</a>
+          <a class="clearfix games-list-my-icon right" href="">
+            <img class="left" src="img/choose-cat.png">
+            <div class="right games-list-item-status">pending</div>
+          </a>
+        </li>
+        <li class="game-list-game row clearfix">
+          <a class="games-list-partner-avatar left" href=""><img src=""></a>
+          <a class="games-list-partner-name left" href="">uri hamster</a>
+          <a class="clearfix games-list-my-icon right" href="">
+            <img class="left" src="img/choose-cat.png">
+            <div class="right games-list-item-status">pending</div>
+          </a>
+        </li>
+        <li class="game-list-game row clearfix">
+          <a class="games-list-partner-avatar left" href=""><img src=""></a>
+          <a class="games-list-partner-name left" href="">uri hamster</a>
+          <a class="clearfix games-list-my-icon right" href="">
+            <img class="left" src="img/choose-cat.png">
+            <div class="right games-list-item-status">pending</div>
+          </a>
+        </li>
+        <li class="game-list-game row clearfix">
+          <a class="games-list-partner-avatar left" href=""><img src=""></a>
+          <a class="games-list-partner-name left" href="">uri hamster</a>
+          <a class="clearfix games-list-my-icon right" href="">
+            <img class="left" src="img/choose-cat.png">
+            <div class="right games-list-item-status">pending</div>
+          </a>
+        </li>
+      </ul>
+    -->
+    </div>
+</div>
+<!--
+<div id="status">
+</div>
+
+<a href="#" id="login-try" onclick="login_try()">LOGIN-TRY</a>
+
+<a href="#" id="login-try" onclick="onChallenge()">CHALLENGE-TRY</a>
+
+
+ZZZhmmmm
+-->
 </body>
 </html>
