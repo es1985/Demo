@@ -1,5 +1,22 @@
 var friendCache = {};
 
+
+
+
+function listen_to_json ()
+  {
+       socket.on("data", function(msg){read_j(msg);});
+  }
+
+
+function read_j(msg)
+{
+  
+}
+
+
+// ---------
+
 function login_try()
 {
   FB.login(function(response){
@@ -21,13 +38,14 @@ function login_try()
       // The person is not logged into Facebook, so we're not sure if
      put_login();
     }
-  },{scope: 'public_profile,email,user_friends'});
+  },{scope: 'public_profile,email,user_friends,user_likes'});
 }
 
 function getMe(callback) {
-  FB.api('/me', {fields: 'id,email,name,first_name,picture.width(120).height(120)'}, function(response){
+  FB.api('/me', {fields: 'id,email,name,first_name,gender,hometown,languages,locale,location,relationship_status,age_range,picture.width(120).height(120)',}, function(response){
     if( !response.error ) {
       friendCache.me = response;
+
        if (callback)
        {
         callback();
@@ -114,14 +132,15 @@ function invite_this_one(id)
 
 function char_chosen(type)
 {
+  console.log("chosen "+type);
   sessionStorage.is_cat=type;
  if (type)
  {
-  sessionStorage.game_id=String(sessionStorage.other_id)+'_'+String(sessionStorage.my_id);
+  sessionStorage.game_id=String(sessionStorage.other_id)+'_'+String(sessionStorage.my_id).trim();
  }
  else
  {
-  sessionStorage.game_id=String(sessionStorage.my_id)+'_'+String(sessionStorage.other_id);
+  sessionStorage.game_id=String(sessionStorage.my_id)+'_'+String(sessionStorage.other_id).trim();
  }
   //getFriendsInGame(putFriendsInGame);
   //
@@ -140,14 +159,14 @@ function putFriendsInGame()
    //<img class="left" src="img/choose-cat.png">
    //friendCache.friends.data[0].id
    // &#39'+friendCache.friends.data[i].id+'&#39
-   html_thing='<li class="game-list-game row clearfix" onclick="show_chars( &#39 '+String(id)+' &#39 )"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[i].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[i].name+'</a><a class="clearfix games-list-my-icon right" href="#"><div class="right games-list-item-status">pending</div></a></li>';
+   html_thing='<li class="game-list-game row clearfix" onclick="show_chars( &#39 '+String(id)+' &#39)"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[i].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[i].name+'</a><a class="clearfix games-list-my-icon right" href="#"><div class="right games-list-item-status">pending</div></a></li>';
    $("#available_friends_list").append(html_thing);
   }
 }
 
 function show_chars(id)
 {
-  console.log(id)
+  id = id.trim();
   //sessionStorage.new_char=type;
   $('#char_choose').css('display','block');
   sessionStorage.other_id=id;
@@ -156,9 +175,18 @@ function show_chars(id)
 
 function writeMe()
 {
-  
   sessionStorage.my_id=friendCache.me.id;
-  console.log(sessionStorage.my_id);
+
+ 
+  jason = friendCache.me;
+  jason.data_type="player";
+  console.log('HHHHHHHH');
+  txt=JSON.stringify(jason);
+
+  console.log(jason);
+  console.log("What");
+  socket.emit('data', txt);
+
 }
 
 
@@ -188,7 +216,7 @@ function sendChallenge(to, message, callback) {
 
 function onChallenge() {
   sendChallenge(null,'Zionism is bad! Send Me Some HTML Files!', function(response) {
-    console.log('sendChallenge',response);
+    //console.log('sendChallenge',response);
   });
 }
 
@@ -206,7 +234,6 @@ $('#login_thing').css('display','none');
 function put_games_screen(){
 $('#games_screen').css('display','block');
 }
-
 
 
 
