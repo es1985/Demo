@@ -1,5 +1,5 @@
 <!doctype html>
-<html class="no-js" lang="en">
+<html id="inner-html" class="no-js" lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,6 +16,7 @@
 
   <script src="js/miau.js"></script>
   <script src="js/game_manager.js"></script>
+  <script src="js/social.js"></script>
   <script src="js/animation_manager.js"></script>
 
   <script src="https://www.gstatic.com/swiffy/v7.1/runtime.js"></script>
@@ -56,13 +57,13 @@ JSON object to come out:
   z-index: 7;'>
 </a>
 
-<div id="scratch_image" style='display: none;'> 
-  <a id="clickable_scratch" onclick="game_manager.scratch_image_clicked()"><img src="img/wall-scratch.png"></a>
+<div id="scratch-image" style='display: none;'> 
+  <a id="clickable-scratch" onclick="game_manager.scratch_image_clicked()"><img src="img/wall-scratch.png"></a>
 </div>
 
 <!-- onmousedown="javascript:game_manager.cat_click_down()" onmouseup="javascript:game_manager.cat_click_up()" --> 
 
-<div id="swiffycontainer" class="swiffy_cat" style="width:300px;height:300px;">
+<div id="cat_stage" class="swiffy_cat" style="width:300px;height:300px;">
  
 
 <!--
@@ -70,13 +71,13 @@ JSON object to come out:
 -->
   <!-- onclick="javascript:play_anim_and_loop('eyes_twitch','cat_breathing',2000,'swiffycontainer')"-->
 </div>
-<div id="swiffycontainer2" class="swiffy_cat" style="width:300px;height:300px;">
+<div id="cat_hidden_stage" class="swiffy_cat" style="width:300px;height:300px;">
 </div>
 
-<div id="swiffycontainer3" class="swiffy_cat" style="width:300px;height:300px;">
+<div id="cat_hidden_stage2" class="swiffy_cat" style="width:300px;height:300px;">
 </div>
 
-<div id="fish-swiffy" style="width:300px;height:300px;">
+<div id="fish_stage" style="width:300px;height:300px;">
 </div>
 
 
@@ -371,10 +372,55 @@ JSON object to come out:
      //game_manager.read_j(txt3);
      var txt4 = '{"sender":"BB Netanyahu","food_accepted":1,"cat_sender":"0"}';
      //game_manager.read_j(txt4);
-     var txt5 = '{"sender":"BB Netanyahu","cat_sender":"0","general_animation_loop":"fish_regular","animation_stage":"fish-swiffy"}';
+     var txt5 = '{"sender":"BB Netanyahu","cat_sender":"0","general_animation_loop":"fish_regular","animation_stage":"fish_stage"}';
      //game_manager.read_j(txt5);
      var txt6 = '{"sender":"BB Netanyahu","score":"100"}';
      //game_manager.read_j(txt6);
+
+
+
+     var init_json = {
+      initialize:1,
+    game_state:{
+        cat:sessionStorage.is_cat,
+        score:1880,
+        health:100,
+        health_proxy:100,
+        level:0,
+        player:"Pips",
+        other_player_name:"Norman",
+        current_emoticons:[],
+        possible_emoticon_list:[],
+        notifications:0,
+        dead:0,
+        health_timer:{},
+        modal_cue:[],
+        message_number:0,
+        emoticon_number:0,
+        cat_sleep:0,
+        food_bowl_opened:0,
+        food_at_bowl:0,
+        normal_mode:1,
+        new_emoticon_pack:[],
+        fish_there:0,
+        scratching:0,
+        displayed_cat_stage:"cat_stage",
+        timeouts:{},
+        game_id:game_manager.game_id,
+        my_id:0,
+        other_id:0,
+        scratch_mark:0,
+        last_timestamp:28,
+        last_health_timestamp:0,
+        animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
+        },
+        chat_history:[
+        {},
+        ],
+    };
+    var init_txt = JSON.stringify(init_json);
+     game_manager.read_j(init_txt);
+
 
      </script>
 

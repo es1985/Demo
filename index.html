@@ -18,8 +18,11 @@
 
 <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
 
+<script src="/socket.io/socket.io.js"></script>
+
 <script src="//connect.facebook.net/en_US/sdk.js"></script> 
 <script src="js/social.js"></script>
+
 <script>
 
 window.fbAsyncInit = function() 
@@ -91,6 +94,11 @@ window.fbAsyncInit = function()
 
 </script>
 
+<script>
+var socket=io();
+listen_to_json();
+</script>
+
 </head>
 <body>
 
@@ -103,28 +111,36 @@ window.fbAsyncInit = function()
   </div>
 
 
-<a href="#" onclick="on_invite()"> INVITE </a>
+
 
 
 <div id="games_screen" class="row" style="display:none">
     <div class="small-12 columns games">
       <h1 class="choose-title">pips</h1>
-      <h2 class="start-games">You have <span class"game-left-count">3</span> invitations left!</h2>
-      <h2 class="start-games">start a game</h2>
+      <!-- <h2 class="start-games">You have <span class"game-left-count">3</span> invitations left!</h2> -->
+      <h2 class="start-games">start a game</h2> 
       <ul id="char_choose" class="choose-character inline-list" style="display:none">
         <li><p class="choose-cat" onclick="char_chosen(1)" id="anim" style="position:auto;"><img src="img/choose-cat.png"></p></li>
-        <li><p class="choose-human" onclick="char_chosen(0)" id="div2"><img src="img/choose-man.png"></p></li>
+        <li><p class="choose-human" onclick="char_chosen(0)" id="anim" style="position:auto;"><img src="img/choose-man.png"></p></li>
       </ul>
+
+      <ul id="ongoing_games" class="games-list small-12 columns">
+        <li class="row games-list-head">Games</li>
+      
+    </ul>
+
 
     <ul id="available_friends_list" class="games-list small-12 columns">
-        <li class="row games-list-head">Start A Game!</li>
+        <li class="row games-list-head">Friends Playing</li>
       
-      </ul>
+    </ul>
 
-      <ul id="invite_list" class="games-list small-12 columns">
+    <a id="main-invite" class="small-12 columns" onclick="on_invite()"> INVITE </a>
+
+    <ul id="invite_list" class="games-list small-12 columns">
         <li class="row games-list-head">Invite These Friends</li>
       
-      </ul>
+    </ul>
 
       <!--
 

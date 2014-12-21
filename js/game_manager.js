@@ -2,6 +2,7 @@
 var game_manager = 
 {
 
+  initialized:0,
   cat:1,
   score:0,
   health:100,
@@ -23,10 +24,10 @@ var game_manager =
   local:0,
   socket:{},
   cat_sleep:0,
-  cat_stage:"swiffycontainer",
-  cat_hidden_stage:"swiffycontainer2",
-  cat_hidden_stage2:"swiffycontainer3",
-  fish_stage:"fish-swiffy",
+  cat_stage:"cat_stage",                  // "swiffycontainer" <--> "cat_stage"
+  cat_hidden_stage:"cat_hidden_stage",    // "swiffycontainer2" <--> "cat_hidden_stage"
+  cat_hidden_stage2:"cat_hidden_stage2",  // "swiffycontainer3" <--> "cat_hidden_stage2"
+  fish_stage:"fish_stage",               // "fish-swiffy" <--> "fish_stage"
   head_clicked:0,
   belly_clicked:0,
   food_bowl_opened:0,
@@ -35,14 +36,21 @@ var game_manager =
   new_emoticon_pack:[],
   fish_there:0,
   scratching:0,
-  displayed_cat_stage:"swiffycontainer",
+  displayed_cat_stage:"cat_stage",
   timeouts:{},
   game_id:0,
   my_id:0,
   other_id:0,
   scratch_mark:0,
-  
+  mouse_down:0,
+  last_timestamp:0,
+  last_health_timestamp:0,
+  health_interval:25000,
+  health_interval_while_asleep:50000,
+  interval_for_scratching:7000,
+  animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
 
+  
 /*
   read_j: function(txt)
   {
@@ -98,6 +106,28 @@ change_displayed_cat_stage_to:
 */
 
   var jason = JSON.parse(txt);
+
+    if(jason.initialize)
+    {
+
+      this.initialize(jason);
+      return;
+    }
+
+
+    if (!this.initialized)
+    {
+      return;
+    }
+
+    if (jason.timestamp)
+    {
+      this.last_timestamp=jason.timestamp;
+    }
+    else
+    {
+      return;
+    }
 
     if(!jason.sender )// || jason.cat_sender===undefined)
     {
@@ -156,6 +186,7 @@ change_displayed_cat_stage_to:
     if(jason.nu_health)
     {
       this.health_me(jason.nu_health);
+      this.last_health_timestamp=jason.timestamp;
     }
 
     if(jason.cat_animation_loop)
@@ -175,6 +206,7 @@ change_displayed_cat_stage_to:
 
     if (jason.normal_mode>=1 || jason.normal_mode===0)
     {
+
       this.normal_mode=jason.normal_mode;
       if (jason.normal_mode>=1)
       {
@@ -206,7 +238,7 @@ change_displayed_cat_stage_to:
 
     if(jason.scratching==1 || jason.scratching===0)
     {
-      this.change_sleep(jason.cat_sleep);
+      this.change_scratch(jason.scratching);
     }
 
     if(jason.scratch_mark>=1 || jason.scratch_mark===0)
@@ -216,7 +248,7 @@ change_displayed_cat_stage_to:
     
     if (jason.head_clicked>=1 || jason.head_clicked===0)
     {
-      this.head_clicked=jason.head_clicked;
+      this.head_clickdown(jason.head_clicked); 
     }
 
     if (jason.food_bowl)
@@ -226,10 +258,193 @@ change_displayed_cat_stage_to:
 
     if (jason.change_displayed_cat_stage_from && jason.change_displayed_cat_stage_to)
     {
-
       this.change_cat_display(jason.change_displayed_cat_stage_from,jason.change_displayed_cat_stage_to);
     }
 
+  },
+
+  initialize: function(jason)
+  {
+
+
+    /*
+  Game initialization JSON:
+    
+  {
+    game_state:{
+        cat:1,
+        score:0,
+        health:100,
+        health_proxy:100,
+        level:0,
+        player:"Norman",
+        other_player_name:"Norman",
+        current_emoticons:[],
+        possible_emoticon_list:[],
+        notifications:0,
+        dead:0,
+        health_timer:{},
+        modal_cue:[],
+        message_number:0,
+        emoticon_number:0,
+        cat_sleep:0,
+        food_bowl_opened:0,
+        food_at_bowl:0,
+        normal_mode:1,
+        new_emoticon_pack:[],
+        fish_there:0,
+        scratching:0,
+        displayed_cat_stage:"swiffycontainer",
+        timeouts:{},
+        game_id:0,
+        my_id:0,
+        other_id:0,
+        scratch_mark:0,
+        animations:{cat_stage:"",cat_hidden_stage:"",cat_hidden_stage2:""},
+        },
+        chat_history:[
+        {},
+        ],
+    }
+
+    stats update: 
+    cat v
+    health v
+    score v
+    level v
+    is sleeping v
+    is scratching v
+    scratch v
+    food bowl opened v
+    food at bowl v
+    notifications v
+    displayed_cat_stage
+
+    objects update:
+    fish v
+    emoticons
+
+    */
+
+
+    $.each(jason.game_state, function(prop_name,val){
+      if (!isNaN(parseInt(val)) && prop_name!="game_id")
+      {
+        game_manager[prop_name]=parseInt(val);
+      }
+      else
+      {
+        game_manager[prop_name]=val;
+      }
+
+    });
+
+  /*
+    $.each(this.animations, function(stage_name,anim){
+      //console.log(this.animations+ "  "+ anim);
+      game_manager.put_animaiton_loop(anim,undefined,stage_name); // <--------SHOULD BE "GAME_MANAGER"!!!!
+    });
+   */
+   console.log("CAT IS "+this.cat);
+    if(this.cat==1)
+    {
+      this.configure_for_cat();
+    }
+    else
+    {
+      this.configure_for_human(); 
+    }
+
+    this.make_normal();
+
+    if (this.scratching)
+    {
+      if (($.now()-this.last_timestamp)<this.interval_for_scratching)
+      {
+       this.put_animaiton_plus_loop("scratching_animation","cat_breathing",this.interval_for_scratching,this.cat_stage,undefined,undefined,"scratch_begin","scratch_end");
+      }
+      else
+      {
+        this.scratch_mark=5;
+      }
+    }
+    else if (this.cat_sleep)
+    {
+      this.change_sleep(this.cat_sleep);
+      this.put_animaiton_loop("sleeping_cat",undefined,this.cat_stage);
+    }
+    else
+    {
+      this.put_animaiton_loop("cat_breathing",undefined,this.cat_stage); 
+    }
+
+    this.update_notifications();
+
+    this.make_scratch_mark(this.scratch_mark);
+
+    this.put_food_in_bowl(this.food_at_bowl);
+    
+    if (this.food_bowl_opened)
+    {
+      this.open_close_food_bowl();
+      $('.food-bowl').animate({
+        left:"0vw",
+      }, 500, function(){});
+    }
+    else
+      {
+        $('.food-bowl').animate({
+        left:"-50vw",
+      }, 500, function(){});
+      };
+
+      
+    $("#score_number").html(this.score);
+    $("#level").html(this.level);
+    
+    for(i = jason.chat_history.length; i > 0; i--)
+    {
+      if (jason.chat_history[i-1].emoticon)
+      {
+        this.put_emoticon(jason.chat_history[i-1].emoticon,jason.chat_history[i-1].sender);
+      }
+      else if (jason.chat_history[i-1].text)
+      {
+        this.print_text(jason.chat_history[i-1].text,jason.chat_history[i-1].sender);
+      }
+    }
+    /*
+    general_animation_loop:"fish_regular",
+        animation_stage:this.fish_stage,
+    */
+
+    if(this.fish_there)
+    {
+      this.put_animaiton_loop("fish_regular",undefined,this.fish_stage);
+    };  
+
+    var time_since_last_health_update = $.now()-this.last_health_timestamp;
+    
+    while (time_since_last_health_update>this.health_interval)
+    {
+      time_since_last_health_update=time_since_last_health_update-this.health_interval;
+      this.health=this.health-4;
+
+    }
+
+    $('#cat_hidden_stage').css({'display':'none'});
+    $('#cat_hidden_stage2').css({'display':'none'}) 
+
+    
+    this.possible_emoticon_list=get_possible_emoticons();
+    this.update_emoticon_html();
+
+    this.initialized=1;
+
+    this.adjust_health_pic();
+    //this.update_health(1);
+    //this.update_notifications();
+    
   },
 
   onload_game: function()
@@ -241,50 +456,29 @@ change_displayed_cat_stage_to:
 
     if (!this.local)
     { 
-     
+      jason={
+      data_type:"game",
+      };
+
         this.socket = io();
+        this.listen_to_json();
         this.socket.emit('join',String(this.game_id));      
     };
 
-    
-
-  /*
-    var to_loader={
-  "files": [{
-    "source": "js/animation_manager.js",
-    "type": "SCRIPT",
-    "size": 161455,
-    "stopExecution": false
-  }, 
-    ]};
-
-    $.html5Loader({
-      filesToLoad: to_loader, // this could be a JSON or simply a javascript object
-    });
-
-    */
-
- 
-    $('#points-drop').hide();
 
 // ---- > Prevent the form refresh thing
 
-    $("#in-chat-input").submit(function(e) {
+   $("#in-chat-input").submit(function(e) {
       e.preventDefault();
     });
 
-    this.cat=Number(localStorage.getItem("is_cat"));
+// ---- > hide achievement thing
 
-// ---- > settings
-    this.adjust_health_pic();
-    this.update_health(1);
-    this.listen_to_json();
-    this.update_notifications();
-    this.possible_emoticon_list=get_possible_emoticons();
+    $('#points-drop').hide();
 
- // ----- > MODALS
+// ---- > Bind modal cue
 
-    $('#foodModal').bind('close', function() 
+   $('#foodModal').bind('close', function() 
       { 
         game_manager.progress_cue();
       });
@@ -303,26 +497,13 @@ change_displayed_cat_stage_to:
       { 
         game_manager.progress_cue();
       });
+
     $('#levelgiftModal').bind('closed', function() 
       { 
         game_manager.progress_cue();
       });
-    
-
-
-// ------ > Configure for Human/Cat
-
-    if(this.cat)
-    {
-      this.configure_for_cat();
-    }
-    else
-    {
-      this.configure_for_human(); 
-    }
-
-
-// ------ > SOUND
+   
+   // ------ > SOUND
     ion.sound({
     sounds: [
             {
@@ -350,10 +531,12 @@ change_displayed_cat_stage_to:
         path: "sounds/",
         preload: true
       });
+ 
 
       // ----- > Bind chat open and close events
   $("#chat-drop").on("opened",function(){
     game_manager.chat_opened=1;
+    game_manager.update_notifications();
    });
 
     $("#chat-drop").on("closed",function(){
@@ -363,35 +546,72 @@ change_displayed_cat_stage_to:
     $('#while-scratch-clickable').on('click',function(){
       game_manager.stop_scratch_clicked();
     })
-    //$('#clickable').mousemove.preventDefault();
 
-    $('#swiffycontainer2').css({'display':'none'});
-    $('#swiffycontainer3').css({'display':'none'})
+      $('body').mousedown(function() {
+    game_manager.mouse_is_down();
+    });
+
+        $('body').mouseup(function() {
+    game_manager.mouse_is_up();
+    });
+
+  this.clickable_on();
+
+
     animation_manager.play_anim_loop("wanting_caress",this.cat_hidden_stage);
     animation_manager.play_anim_loop("caressing_going_on",this.cat_hidden_stage2);
 
 
 
+// ---- > Game settings ----- REDUNDANT ! ! ! ! ! 
+/*
+    console.log("this is "+sessionStorage.getItem("is_cat"));
+    this.cat=Number(sessionStorage.getItem("is_cat"));
+
+    this.adjust_health_pic();
+    this.update_health(1);
+    this.update_notifications();
+    this.possible_emoticon_list=get_possible_emoticons();
+
+    if(this.cat)
+    {
+      this.configure_for_cat();
+    }
+    else
+    {
+      this.configure_for_human(); 
+    }
+
+    $('#cat_hidden_stage').css({'display':'none'});
+    $('#cat_hidden_stage2').css({'display':'none'})
+
+    this.make_normal(); 
+  
+    */
+  },
+
+    clickable_on: function()
+    {
+
     $('#clickable').mousedown(function() {
     game_manager.cat_click_down();
-
     });
 
+    $('#clickable').mousemove(function() {
+    game_manager.cat_mousemove();
+    });
+
+    /*
     $('#clickable').mouseup(function() {
     game_manager.cat_click_up();
     });
-
-  this.make_normal(); 
-
-/*
-    $('#clickable').click(function() {
-
-    game_manager.cat_clicked();
-
-    });
-    
-*/
+    */
   },
+
+   clickable_off: function()
+    {
+      $('#clickable').off();
+    },
 
   make_normal: function()
   {
@@ -421,14 +641,16 @@ change_displayed_cat_stage_to:
     //$(".human-feed").on("click",open_food_thing);
     
     $("#chat-drop .orbit-container").hide();
-    this.other_player_name="Pips";
+    
+    //this.other_player_name="Pips";
+    
     $(".human-feed").show(); 
   },
 
  configure_for_cat: function()
   {
 
-    this.player="Pips";
+    //this.player="Pips";
     
     $("#offered_food_image").attr("src",get_food_file("1"));
      emoticon_array=['emo-happy','emo-mad','emo-food','emo-love','emo-night','emo-kania'];
@@ -475,8 +697,48 @@ change_displayed_cat_stage_to:
 
   },
   
+  mouse_is_down: function()
+  {
+    this.mouse_down=1;
+    console.log("chat_opened "+this.chat_opened);
+  },
+
+  mouse_is_up: function()
+  {
+    this.mouse_down=0;
+  },
+
+  head_clickdown: function(head_clicked)
+  {
+      this.head_clicked=head_clicked;
+      
+      $('#clickable').off();
+      if (jason.head_clicked)
+      {
+      $('#clickable').mouseup(function() {
+       game_manager.cat_click_up();
+      });
+      }
+      
+  },
 
   cat_click_down: function()
+  {
+
+   var delayed_by=100;
+     this.timeouts[this.cat_stage]=setTimeout(function(){
+      if(this.mouse_down)
+      {
+        game_manager.delayed_clickdown();
+      };
+    },delayed_by);
+  
+ // this.delayed_clickdown()
+
+  },
+
+
+  delayed_clickdown: function()
   {
     if(this.normal_mode || this.head_clicked>0)
     {
@@ -544,13 +806,21 @@ change_displayed_cat_stage_to:
     } 
   },
 
+  cat_mousemove: function()
+  {
+    if (this.head_clicked && this.mouse_down)
+    {
+      this.cat_click_up();
+    }
+  },
 
   cat_click_up: function()
    {
 
     //alert("UP");
     // jason.cat_animation_loop,jason.sent_sound
-    
+    console.log("UP UP");
+
       var sender_dude=game_manager.get_player_name();
       var jesson =
       {
@@ -602,16 +872,20 @@ change_displayed_cat_stage_to:
     this.stop_timer(stage_to);
     var id="#"+stage_from;
     var id2="#"+stage_to;
-    delayed_by=50;
-    //$(id).css({'display':'none'});
+    delayed_by=100;
+    
+    //$("#clickable").hide();
     this.timeouts[stage_from]=setTimeout(function(){game_manager.delayed_hide_stage(id);},delayed_by);
+    
     $(id2).css({'display':'block'});
     this.displayed_cat_stage=stage_to;
+    console.log($("#cat_stage").css('display'));
    },
 
    delayed_hide_stage: function(stage_from_id)
    {
       $(stage_from_id).css({'display':'none'});
+      //$("#clickable").show();
    }, 
 
    stop_timer: function(stagee)
@@ -750,6 +1024,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   },
 
 
+
    send_animation_loop: function(anim)
   {
     var sender_dude=game_manager.get_player_name();
@@ -818,15 +1093,19 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   scratch_clicked: function()
   {
+    
+    console.log("CLICICICI");
+
     if (this.normal_mode)
     {
+
       var sender_dude=game_manager.get_player_name();
       var jesson =
   {
     sender:sender_dude,
     cat_anim1:"scratching_animation",
     cat_anim2:"cat_breathing",
-    time_between_animations:7000,
+    time_between_animations:this.interval_for_scratching,
     normal_mode:0,
     scratching:1,
     function_w_anim1:"scratch_begin",
@@ -852,7 +1131,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   scratch_begin: function()
   {
-    this.scratching=1;
+    //this.scratching=1;
     $('#clickable').hide();
     $('#while-scratch-clickable').show();
   },
@@ -860,15 +1139,20 @@ put_animaiton_loop: function(anim,sent_sound,stage)
    scratch_end: function()
   {
     //SHOW SCRATCH!!
-    $('#scratch_image').show();
+    
+    //$('#scratch_image').show();
+
+
 
      var sender_dude=game_manager.get_player_name();
       var jesson =
   {
     sender:sender_dude,
     scratch_mark:5,
-    normal:1,
+    normal_mode:1,
+    scratching:0,
     cat_sender:this.cat,
+    timer_stop:this.cat_stage,
   };
 
   txt=JSON.stringify(jesson);
@@ -887,13 +1171,13 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     this.scratch_mark=scratch_mark;
     if(scratch_mark===0)
     {
-      $("#scratch_image").hide();
+      $("#scratch-image").hide();
     }
     else
     {
-      $("#scratch_image").show();
+      $("#scratch-image").show();
       var op = scratch_mark/5;
-      $("#scratch_image").css('opacity',op);
+      $("#scratch-image").css('opacity',op);
     }
 
   },
@@ -1054,7 +1338,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       this.chat_opened=1;
     }
    */ 
-    this.update_notifications();
+    //this.update_notifications();
   },
 
 
@@ -1268,7 +1552,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
       game_manager.send_j(txt);
 
-      if (this.cat)
+      //if (this.cat)
+      if(1==1)
         {
           window.clearInterval(this.health_timer);
           this.set_health_timer();
@@ -1343,9 +1628,10 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     }
   },
 
+
   set_health_timer: function()
   {
-    this.health_timer=setInterval(function () {game_manager.hunger_tick()}, 25000);
+    this.health_timer=setInterval(function () {game_manager.hunger_tick()}, this.health_interval);
   },
 
   play_dead: function()
@@ -1357,7 +1643,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
         sender:sender_dude,
         cat_animation_loop:"sick_cat",
        dead:1,
-       normal:0,
+       normal_mode:0,
+       timer_stop:this.cat_stage,
        cat_sender:this.cat,
       };
 
@@ -1439,7 +1726,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       {
         sender:sender_dude,
         general_animation_loop:"fish_regular",
-        animation_stage:"fish-swiffy",
+        animation_stage:this.fish_stage,
         fish_there:1,
         cat_sender:this.cat,
       };
@@ -1527,10 +1814,23 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   {
     if (!this.local)
     {
-      //this.socket.emit(this.game_id, txt);
+      //this.socket.emit(this.game_id, txt);   
+      txt = this.add_standards(txt);
       this.socket.emit(String(this.game_id), txt);
     }
   },
+
+  add_standards: function(txt)
+  {
+    var jason = JSON.parse(txt);
+    jason.data_type="game";
+    jason.game_id=this.game_id;
+    jason.timestamp=$.now();
+    jason.date_time=new Date(jason.timestamp);
+    txt = JSON.stringify(jason);
+    return(txt);
+  },
+
 
   listen_to_json: function()
   {
