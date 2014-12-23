@@ -60,7 +60,7 @@ window.fbAsyncInit = function()
       console.log('Successful login for: ' + response.name);
        getMe(writeMe);
       // getPermissions(writePerm);
-      getFriendsInGame(putFriendsInGame);
+      getFriendsInGame(put_games_and_ingame_friends);
       getInvitableFriends(putInvitableFriends);
    //     document.getElementById('status').innerHTML = 'Thanks for logging in, ' + response.name + '!';
     });
@@ -68,7 +68,6 @@ window.fbAsyncInit = function()
   }
 
   function statusChangeCallback(response) {
- console.log('Wongo! AAAAHHHHH');
     //console.log('statusChangeCallback');
     console.log(response);
 
@@ -96,7 +95,7 @@ window.fbAsyncInit = function()
 
 <script>
 var socket=io();
-listen_to_json();
+
 </script>
 
 </head>
@@ -109,10 +108,6 @@ listen_to_json();
       <button class="small-12 columns login-facebook" id="login-try" onclick="login_try()">Login with Facebook</button>
     </div>
   </div>
-
-
-
-
 
 <div id="games_screen" class="row" style="display:none">
     <div class="small-12 columns games">

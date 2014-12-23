@@ -381,7 +381,7 @@ JSON object to come out:
 
      var init_json = {
       initialize:1,
-    game_state:{
+    stats:{
         cat:sessionStorage.is_cat,
         score:1880,
         health:100,
@@ -410,8 +410,8 @@ JSON object to come out:
         my_id:0,
         other_id:0,
         scratch_mark:0,
-        last_timestamp:28,
-        last_health_timestamp:0,
+        last_timestamp:$.now(),
+        last_health_timestamp:$.now(),
         animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
         },
         chat_history:[

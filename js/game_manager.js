@@ -2,32 +2,22 @@
 var game_manager = 
 {
 
-  initialized:0,
-  cat:1,
   score:0,
   health:100,
   health_proxy:100,
   level:0,
   player:"Norman",
-  food_opened:0,
-  chat_opened:0,
   other_player_name:"Norman",
+  food_opened:0,
   current_emoticons:[],
   possible_emoticon_list:[],
-  notifications:0,
   dead:0,
   health_timer:{},
   level_modal_open:0,
-  modal_cue:[],
   message_number:0,
   emoticon_number:0,
   local:0,
-  socket:{},
   cat_sleep:0,
-  cat_stage:"cat_stage",                  // "swiffycontainer" <--> "cat_stage"
-  cat_hidden_stage:"cat_hidden_stage",    // "swiffycontainer2" <--> "cat_hidden_stage"
-  cat_hidden_stage2:"cat_hidden_stage2",  // "swiffycontainer3" <--> "cat_hidden_stage2"
-  fish_stage:"fish_stage",               // "fish-swiffy" <--> "fish_stage"
   head_clicked:0,
   belly_clicked:0,
   food_bowl_opened:0,
@@ -36,21 +26,32 @@ var game_manager =
   new_emoticon_pack:[],
   fish_there:0,
   scratching:0,
-  displayed_cat_stage:"cat_stage",
   timeouts:{},
   game_id:0,
-  my_id:0,
-  other_id:0,
   scratch_mark:0,
-  mouse_down:0,
   last_timestamp:0,
   last_health_timestamp:0,
-  health_interval:25000,
-  health_interval_while_asleep:50000,
   interval_for_scratching:7000,
   animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
-
+  displayed_cat_stage:"cat_stage",
   
+  cat_stage:"cat_stage",                  // "swiffycontainer" <--> "cat_stage"
+  cat_hidden_stage:"cat_hidden_stage",    // "swiffycontainer2" <--> "cat_hidden_stage"
+  cat_hidden_stage2:"cat_hidden_stage2",  // "swiffycontainer3" <--> "cat_hidden_stage2"
+  fish_stage:"fish_stage",               // "fish-swiffy" <--> "fish_stage"
+
+  modal_cue:[],
+  health_interval:25000,
+  health_interval_while_asleep:50000,
+  my_id:0,
+  other_id:0,
+  mouse_down:0,
+  chat_opened:0,
+  cat:1,
+  initialized:0,
+  notifications:[0,0],
+  socket:{},
+
 /*
   read_j: function(txt)
   {
@@ -105,22 +106,22 @@ change_displayed_cat_stage_to:
 }
 */
 
-  var jason = JSON.parse(txt);
+  var big_jason = JSON.parse(txt);
 
-    if(jason.initialize)
+    var jason = big_jason.game_state;
+
+    if(big_jason.initialize)
     {
-
-      this.initialize(jason);
+      this.initialize(big_jason);
       return;
     }
-
 
     if (!this.initialized)
     {
       return;
     }
 
-    if (jason.timestamp)
+    if (big_jason.timestamp)
     {
       this.last_timestamp=jason.timestamp;
     }
@@ -129,10 +130,12 @@ change_displayed_cat_stage_to:
       return;
     }
 
+    /*
     if(!jason.sender )// || jason.cat_sender===undefined)
     {
       document.write("ERROR - NO SENDER");
     }
+    */
 
     if (jason.timer_stop) // ---- IMPORTANT!!!! HAS TO BE FIRST!!!
     {
@@ -336,7 +339,6 @@ change_displayed_cat_stage_to:
       {
         game_manager[prop_name]=val;
       }
-
     });
 
   /*
@@ -402,6 +404,8 @@ change_displayed_cat_stage_to:
     $("#score_number").html(this.score);
     $("#level").html(this.level);
     
+
+
     for(i = jason.chat_history.length; i > 0; i--)
     {
       if (jason.chat_history[i-1].emoticon)
@@ -413,6 +417,8 @@ change_displayed_cat_stage_to:
         this.print_text(jason.chat_history[i-1].text,jason.chat_history[i-1].sender);
       }
     }
+
+    
     /*
     general_animation_loop:"fish_regular",
         animation_stage:this.fish_stage,
@@ -435,7 +441,6 @@ change_displayed_cat_stage_to:
     $('#cat_hidden_stage').css({'display':'none'});
     $('#cat_hidden_stage2').css({'display':'none'}) 
 
-    
     this.possible_emoticon_list=get_possible_emoticons();
     this.update_emoticon_html();
 
@@ -1295,6 +1300,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     }
   },
 
+
   update_notifications: function()
   {
     if (this.chat_opened)
@@ -1823,8 +1829,70 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   add_standards: function(txt)
   {
     var jason = JSON.parse(txt);
+
+    var game_stats = {
+  initialized:0,
+  cat:1,
+  score:0,
+  health:100,
+  health_proxy:100,
+  level:0,
+  player:"Norman",
+  food_opened:0,
+  chat_opened:0,
+  other_player_name:"Norman",
+  current_emoticons:[],
+  possible_emoticon_list:[],
+  notifications:0,
+  dead:0,
+  health_timer:{},
+  level_modal_open:0,
+  modal_cue:[],
+  message_number:0,
+  emoticon_number:0,
+  local:0,
+  cat_sleep:0,
+  cat_stage:"cat_stage",                  
+  cat_hidden_stage:"cat_hidden_stage",    // "swiffycontainer2" <--> "cat_hidden_stage"
+  cat_hidden_stage2:"cat_hidden_stage2",  // "swiffycontainer3" <--> "cat_hidden_stage2"
+  fish_stage:"fish_stage",               // "fish-swiffy" <--> "fish_stage"
+  head_clicked:0,
+  belly_clicked:0,
+  food_bowl_opened:0,
+  food_at_bowl:0,
+  normal_mode:1,
+  new_emoticon_pack:[],
+  fish_there:0,
+  scratching:0,
+  displayed_cat_stage:"cat_stage",
+  timeouts:{},
+  game_id:0,
+  my_id:0,
+  other_id:0,
+  scratch_mark:0,
+  mouse_down:0,
+  last_timestamp:0,
+  last_health_timestamp:0,
+  health_interval:25000,
+  health_interval_while_asleep:50000,
+  interval_for_scratching:7000,
+  animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
+    }
+
+   $.each(game_stats, function(prop_name,val){      
+     game_stats[prop_name]=game_manager[prop_name];
+    });
+
+   $.each(jason, function(prop_name,val){      
+     game_stats[prop_name]=jason[prop_name];
+    });
+
+    jason.game_state = game_stats;
+
     jason.data_type="game";
     jason.game_id=this.game_id;
+    jason.human_id=this.game_id.split('_')[0]
+    jason.cat_id=this.game_id.split('_')[1]
     jason.timestamp=$.now();
     jason.date_time=new Date(jason.timestamp);
     txt = JSON.stringify(jason);
@@ -2002,7 +2070,6 @@ function emoticon_clicked(emoti)
   game_manager.send_j(txt);
 
 }
-
 
 function food_clicked(food)
 {
