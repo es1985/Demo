@@ -6,14 +6,11 @@ var game_manager =
   health:100,
   health_proxy:100,
   level:0,
-  player:"Norman",
-  other_player_name:"Norman",
   food_opened:0,
   current_emoticons:[],
   possible_emoticon_list:[],
   dead:0,
   health_timer:{},
-  level_modal_open:0,
   message_number:0,
   emoticon_number:0,
   local:0,
@@ -27,7 +24,6 @@ var game_manager =
   fish_there:0,
   scratching:0,
   timeouts:{},
-  game_id:0,
   scratch_mark:0,
   last_timestamp:0,
   last_health_timestamp:0,
@@ -35,11 +31,18 @@ var game_manager =
   animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
   displayed_cat_stage:"cat_stage",
   
+  //cat_animation_loop
+
   cat_stage:"cat_stage",                  // "swiffycontainer" <--> "cat_stage"
   cat_hidden_stage:"cat_hidden_stage",    // "swiffycontainer2" <--> "cat_hidden_stage"
   cat_hidden_stage2:"cat_hidden_stage2",  // "swiffycontainer3" <--> "cat_hidden_stage2"
   fish_stage:"fish_stage",               // "fish-swiffy" <--> "fish_stage"
 
+  player:"Norman",
+  other_player_name:"Norman",
+
+  level_modal_open:0,
+  game_id:0,
   modal_cue:[],
   health_interval:25000,
   health_interval_while_asleep:50000,
@@ -63,7 +66,6 @@ var game_manager =
     }
   
   },
-
  // read_j_for_parse: function(txt)
   */
 
@@ -105,10 +107,19 @@ change_displayed_cat_stage_from: name of the stage to display
 change_displayed_cat_stage_to: 
 }
 */
+  console.log("Reading JSON message");
 
-  var big_jason = JSON.parse(txt);
 
-    var jason = big_jason.game_state;
+    if (typeof(txt)=="string")
+    {
+      var big_jason = JSON.parse(txt);
+    }
+    else
+    {
+      big_jason=txt;
+    }
+
+    var jason = big_jason.actions;
 
     if(big_jason.initialize)
     {
@@ -165,9 +176,9 @@ change_displayed_cat_stage_to:
       this.cat_ate_food(jason.food_eaten,jason.sender);
     }
 
-    if (jason.food_sent)
+    if (jason.food_at_bowl)
     {
-      this.put_food_in_bowl(jason.food_sent);
+      this.put_food_in_bowl(jason.food_at_bowl);
     }
 
 
@@ -186,11 +197,16 @@ change_displayed_cat_stage_to:
       this.add_notification();
     }
     
-    if(jason.nu_health)
+    if(jason.health)
     {
-      this.health_me(jason.nu_health);
-      this.last_health_timestamp=jason.timestamp;
+      this.health_me(jason.health);
     }
+
+    if(jason.last_health_timestamp)
+    {
+      this.last_health_timestamp=jason.last_health_timestamp;
+    }
+
 
     if(jason.cat_animation_loop)
     {
@@ -329,25 +345,43 @@ change_displayed_cat_stage_to:
 
     */
 
+    //this.game_id=jason.game_id;
+
+    this.game_id=sessionStorage.game_id;
+
+    this.me_id=sessionStorage.me_id;
+    this.human_id=parseInt(this.game_id.split('_')[0]);
+    this.cat_id=parseInt(this.game_id.split('_')[1]);
+
+    if (this.me_id==this.human_id)
+    {this.cat=0;}
+    else
+    {this.cat=1;}
+
+    this.current_emoticons=['emo-happy','emo-mad','emo-food','emo-love','emo-night','emo-kania'];
+    console.log("JASSSSO ");
+    console.log(jason);
 
     $.each(jason.game_state, function(prop_name,val){
       if (!isNaN(parseInt(val)) && prop_name!="game_id")
       {
         game_manager[prop_name]=parseInt(val);
+        //console.log(prop_name+" - "+val);
       }
       else
       {
         game_manager[prop_name]=val;
+        //console.log(prop_name+" - "+val);
       }
     });
-
+ 
   /*
     $.each(this.animations, function(stage_name,anim){
       //console.log(this.animations+ "  "+ anim);
       game_manager.put_animaiton_loop(anim,undefined,stage_name); // <--------SHOULD BE "GAME_MANAGER"!!!!
     });
    */
-   console.log("CAT IS "+this.cat);
+//   console.log("CAT IS "+this.cat);
     if(this.cat==1)
     {
       this.configure_for_cat();
@@ -406,19 +440,22 @@ change_displayed_cat_stage_to:
     
 
 
+
     for(i = jason.chat_history.length; i > 0; i--)
     {
-      if (jason.chat_history[i-1].emoticon)
+      jason.chat_history[i-1][jason.json_content_type]=jason.json_content;
+
+      if (jason.chat_history[i-1].json_content_type=="emoticon")
       {
-        this.put_emoticon(jason.chat_history[i-1].emoticon,jason.chat_history[i-1].sender);
+        this.put_emoticon(jason.chat_history[i-1].json_content,jason.chat_history[i-1].json_sender);
       }
-      else if (jason.chat_history[i-1].text)
+      else if (jason.chat_history[i-1].json_content_type="text")
       {
-        this.print_text(jason.chat_history[i-1].text,jason.chat_history[i-1].sender);
+
+        this.print_text(jason.chat_history[i-1].json_content,jason.chat_history[i-1].json_sender);
       }
     }
 
-    
     /*
     general_animation_loop:"fish_regular",
         animation_stage:this.fish_stage,
@@ -461,13 +498,13 @@ change_displayed_cat_stage_to:
 
     if (!this.local)
     { 
-      jason={
-      data_type:"game",
-      };
-
         this.socket = io();
         this.listen_to_json();
-        this.socket.emit('join',String(this.game_id));      
+          jason={
+           data_type:"game_init",
+           game_id:this.game_id,
+          };  
+        this.socket.emit('join',jason);      
     };
 
 
@@ -659,6 +696,8 @@ change_displayed_cat_stage_to:
     
     $("#offered_food_image").attr("src",get_food_file("1"));
      emoticon_array=['emo-happy','emo-mad','emo-food','emo-love','emo-night','emo-kania'];
+     console.log("Putting emoticons");
+
     this.add_emoticons(emoticon_array);
 
     this.add_modal("#landingModal");
@@ -705,7 +744,6 @@ change_displayed_cat_stage_to:
   mouse_is_down: function()
   {
     this.mouse_down=1;
-    console.log("chat_opened "+this.chat_opened);
   },
 
   mouse_is_up: function()
@@ -822,9 +860,7 @@ change_displayed_cat_stage_to:
   cat_click_up: function()
    {
 
-    //alert("UP");
     // jason.cat_animation_loop,jason.sent_sound
-    console.log("UP UP");
 
       var sender_dude=game_manager.get_player_name();
       var jesson =
@@ -973,6 +1009,8 @@ change_displayed_cat_stage_to:
 
   add_emoticons: function(emotic_arr)
   {
+
+    console.log("the length "+emotic_arr.length);
     for(i = 0; i < emotic_arr.length; i++)
     {
      this.current_emoticons.push(emotic_arr[i]);
@@ -1542,9 +1580,10 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
       var jesson={
         sender:sender_dude,
-        nu_health:new_health,
+        health:new_health,
         dead:0,
         normal_mode:1,
+        last_health_timestamp:$.now(),
         cat_animation_loop:"cat_breathing",
         cat_sender:this.cat,
       }
@@ -1584,7 +1623,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
       var jesson={
         sender:sender_dude,
-        nu_health:new_health,
+        health:new_health,
+        last_health_timestamp:$.now(),
         cat_sender:this.cat,
       }
 
@@ -1821,41 +1861,39 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     if (!this.local)
     {
       //this.socket.emit(this.game_id, txt);   
+      console.log("EMITING");
+
+       if (typeof(txt)=="string")
+      {
+        txt = JSON.parse(txt);
+      }
+      
       txt = this.add_standards(txt);
+     
       this.socket.emit(String(this.game_id), txt);
     }
   },
 
   add_standards: function(txt)
   {
-    var jason = JSON.parse(txt);
+    var jason = {};
+    //jason.actions=JSON.parse(txt);
+    jason.actions=txt;
 
     var game_stats = {
-  initialized:0,
-  cat:1,
-  score:0,
-  health:100,
+      score:0,
+      health:100,
   health_proxy:100,
   level:0,
-  player:"Norman",
   food_opened:0,
-  chat_opened:0,
-  other_player_name:"Norman",
   current_emoticons:[],
   possible_emoticon_list:[],
-  notifications:0,
   dead:0,
   health_timer:{},
-  level_modal_open:0,
-  modal_cue:[],
   message_number:0,
   emoticon_number:0,
   local:0,
   cat_sleep:0,
-  cat_stage:"cat_stage",                  
-  cat_hidden_stage:"cat_hidden_stage",    // "swiffycontainer2" <--> "cat_hidden_stage"
-  cat_hidden_stage2:"cat_hidden_stage2",  // "swiffycontainer3" <--> "cat_hidden_stage2"
-  fish_stage:"fish_stage",               // "fish-swiffy" <--> "fish_stage"
   head_clicked:0,
   belly_clicked:0,
   food_bowl_opened:0,
@@ -1864,39 +1902,44 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   new_emoticon_pack:[],
   fish_there:0,
   scratching:0,
-  displayed_cat_stage:"cat_stage",
   timeouts:{},
-  game_id:0,
-  my_id:0,
-  other_id:0,
   scratch_mark:0,
-  mouse_down:0,
-  last_timestamp:0,
+  last_timestamp:$.now(),
   last_health_timestamp:0,
-  health_interval:25000,
-  health_interval_while_asleep:50000,
   interval_for_scratching:7000,
   animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
-    }
+  displayed_cat_stage:"cat_stage",
+  cat_animation_loop:'cat_breathing',
+  };
 
    $.each(game_stats, function(prop_name,val){      
      game_stats[prop_name]=game_manager[prop_name];
     });
 
-   $.each(jason, function(prop_name,val){      
-     game_stats[prop_name]=jason[prop_name];
+   $.each(jason.actions, function(prop_name,val){      
+     game_stats[prop_name]=jason.actions[prop_name];
     });
 
+   if (!txt.no_game_state)
+   {
     jason.game_state = game_stats;
-
     jason.data_type="game";
+    }
+    else
+    {
+      jason.data_type="chat_message";
+    }
+
     jason.game_id=this.game_id;
-    jason.human_id=this.game_id.split('_')[0]
-    jason.cat_id=this.game_id.split('_')[1]
+    jason.human_id=this.human_id;
+    jason.sent_by=this.cat;
+    // jason.human_id=this.game_id.split('_')[0];
+    // jason.cat_id=this.game_id.split('_')[1];
+    jason.cat_id=this.cat_id;
     jason.timestamp=$.now();
     jason.date_time=new Date(jason.timestamp);
-    txt = JSON.stringify(jason);
-    return(txt);
+    //txt = JSON.stringify(jason);
+    return(jason);
   },
 
 
@@ -1948,7 +1991,6 @@ function get_emoticon_file(txt)
  "emo-pilot":"img/emoticons/emo-pilot.png",
  "emo-worried":"img/emoticons/emo-worried.png",
  "emo-food":"img/emoticons/emo-food.png",
- 
 };
 
   if (diction[txt])
@@ -2039,6 +2081,7 @@ function text_submitted()
   var jesson ={
     text:submitted_txt,
     sender:sender_dude,
+    no_game_state:1,
     score:1,
     notification:1,
     cat_sender:game_manager.cat,
@@ -2057,6 +2100,7 @@ function emoticon_clicked(emoti)
   var jesson ={
     sender:sender_dude,
     emoticon:emoti,
+    no_game_state:1,
     score:2,
     notification:1,
     cat_sender:game_manager.cat,
@@ -2102,7 +2146,7 @@ else
     {
      sender:sender_dude,
       //food_offered:food,
-      food_sent:food,
+      food_at_bowl:food,
       //score:score_change,
       cat_sender:game_manager.cat,
      };

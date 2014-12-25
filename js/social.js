@@ -5,14 +5,35 @@ var friendCache = {};
 
 function listen_to_json ()
   {
-       socket.on(String(friendCache.me.id), function(msg){read_j(msg);});
+       socket.on(friendCache.me.id, function(msg){ console.log("User ID Is "+ friendCache.me.id);
+        read_j(msg);});
   }
 
 
 function read_j(msg)
 {
-  if (1==1) // -----> Data type!!!
+  console.log("MESSAGE ARRIVED");
+  if (msg.game_status=="new") // -----> Data type!!!
   { 
+    console.log("Nu GAme Bitches");
+
+    if ( friendCache.me.id == msg.game_id.split('_')[0])
+      {var other_is_cat=1;
+        var me_cat=0;}
+      else
+      {var other_is_cat=0; 
+        var me_cat=1;}
+
+      friendCache.game_mates[friendCache.game_mates.length]={
+      other_id:msg.game_id.split('_')[other_is_cat],
+      cat:me_cat,
+      game_id:msg.game_id,
+      started:0};
+
+      put_games_and_ingame_friends();
+  }
+  else 
+  {
     friendCache.game_mates= [];
     for (i=0 ; i <msg.length ; i++)
     {
@@ -22,25 +43,31 @@ function read_j(msg)
       else
       {var other_is_cat=0; 
         var me_cat=1;}
+
       msg[i].game_id.split('_')[other_is_cat];
-      
+      if (msg[i].game_start)
+        {start=1;}
+      else
+        {start=0;}
       friendCache.game_mates[i]= {
       other_id:msg[i].game_id.split('_')[other_is_cat],
       cat:me_cat,
-      game_id:msg[i].game_id,};
-      //html_thing='<li class="game-list-game row clearfix" onclick="show_chars( &#39 '+String(id)+' &#39)"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[i].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[i].name+'</a><a class="clearfix games-list-my-icon right" href="#"><div class="right games-list-item-status">pending</div></a></li>';
-    }
+      game_id:msg[i].game_id,
+      started:start, // <------ CHANGE THE 'STARTED' THING LAGER
+      }; 
+          }
     friendCache.got_ongoing_games=1;
     put_games_and_ingame_friends();
   }
- console.log("HH "+JSON.stringify(friendCache.game_mates)); 
 }
 
 function put_games_and_ingame_friends()
 {
-console.log("HEjjj "+friendCache.got_ongoing_games+" - "+friendCache.got_ingame_friends);
+// console.log("HEjjj "+friendCache.got_ongoing_games+" - "+friendCache.got_ingame_friends);
  if (friendCache.got_ongoing_games && friendCache.got_ingame_friends)
  {
+  $('.game-instance').remove();
+  $('.in-game-friend-instance').remove();
   putGames();
   putFriendsInGame();
  }
@@ -60,9 +87,20 @@ function putGames ()
       }
     }
 
+    console.log("Here cat is " + friendCache.game_mates[i].cat);
+    
+    var choose_image="img/choose-man.png";
+    if (friendCache.game_mates[i].cat)
+    {choose_image="img/choose-cat.png";}
+
+    var is_pending="";
+    if (!friendCache.game_mates[i].started)
+    {
+      is_pending='<div class="right games-list-item-status">pending</div>';
+    }
     //id=friendCache.game_mates[i].other_id;
 //&#39'+i+'&#39
-   html_thing='<li class="game-list-game row clearfix" onclick="load_game('+i+')"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[friendCache.game_mates[i].friend_index].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[friendCache.game_mates[i].friend_index].name+'</a><a class="clearfix games-list-my-icon right" href="#"><div class="right games-list-item-status">pending</div></a></li>';
+   html_thing='<li class="game-list-game row clearfix game-instance" onclick="load_game('+i+')"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[friendCache.game_mates[i].friend_index].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[friendCache.game_mates[i].friend_index].name+'</a><a class="clearfix games-list-my-icon right" href="#"><img class="left" src="'+choose_image+'">'+is_pending+'</a></li>';
    $("#ongoing_games").append(html_thing);
    friendCache.friends.data[friendCache.game_mates[i].friend_index].game_on=1;
   }
@@ -72,12 +110,23 @@ function load_game(index)
 {
 
   index=parseInt(index);
+  if (!friendCache.game_mates[index].started)  
+  {
+    var jason = {
+      game_id:friendCache.game_mates[index].game_id,
+      data_type:"game_enter",
+      sent_by:friendCache.game_mates[index].cat,
+    };
+    
+    jason.timestamp=$.now();
+    jason.date_time=new Date(jason.timestamp);
+    socket.emit('join',jason);
+  }
   sessionStorage.game_id=friendCache.game_mates[index].game_id;
-  sessionStorage.is_cat=friendCache.game_mates[index].me_cat;
+  sessionStorage.is_cat=friendCache.game_mates[index].cat;
   window.location.href="game.html#";
   
 }
-
 
 function putFriendsInGame()
 {
@@ -87,7 +136,7 @@ function putFriendsInGame()
       if (1==1)
     {
       id=friendCache.friends.data[i].id;
-      html_thing='<li class="game-list-game row clearfix" onclick="show_chars( &#39 '+String(id)+' &#39)"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[i].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[i].name+'</a><a class="clearfix games-list-my-icon right" href="#"><div class="right games-list-item-status">pending</div></a></li>';
+      html_thing='<li class="game-list-game row clearfix in-game-friend-instance" onclick="show_chars( &#39 '+String(id)+' &#39)"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[i].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[i].name+'</a><a class="clearfix games-list-my-icon right" href="#"></a></li>';
       $("#available_friends_list").append(html_thing);
     }
   }
@@ -100,7 +149,7 @@ function putInvitableFriends()
   {
    //console.log(friendCache.invitable_friends.data[i]); +friendCache.invitable_friends.data[i].picture.data.url+  +friendCache.invitable_friends.data[i].name+
    // <img class="left" src="img/choose-cat.png">
-   html_thing='<li class="game-list-game row clearfix" onclick="invite_this_one(&#39'+friendCache.invitable_friends.data[i].id+'&#39)"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.invitable_friends.data[i].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.invitable_friends.data[i].name+'</a><a class="clearfix games-list-my-icon right" href="#"><div class="right games-list-item-status">pending</div></a></li>';
+   html_thing='<li class="game-list-game row clearfix" onclick="invite_this_one(&#39'+friendCache.invitable_friends.data[i].id+'&#39)"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.invitable_friends.data[i].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.invitable_friends.data[i].name+'</a><a class="clearfix games-list-my-icon right" href="#"></a></li>';
    $("#invite_list").append(html_thing);
   }
 }
@@ -138,7 +187,7 @@ function getMe(callback) {
   FB.api('/me', {fields: 'id,email,name,first_name,gender,hometown,languages,locale,location,relationship_status,age_range,picture.width(120).height(120)',}, function(response){
     if( !response.error ) {
       friendCache.me = response;
-
+      sessionStorage.me_id=friendCache.me.id;
        if (callback)
        {
         callback();
@@ -238,7 +287,12 @@ var jason = {game_id:nu_game_id,
   sent_by:type,};
   jason.timestamp=$.now();
   jason.date_time=new Date(jason.timestamp);
+
+  //socket.on(String(nu_game_id), function(msg){console.log(msg);});
+
  socket.emit('join',jason);
+
+ $('#char_choose').css('display','none');
 
  console.log("SHOULD jOIN NOW "+nu_game_id);
   //getFriendsInGame(putFriendsInGame);
@@ -248,13 +302,13 @@ var jason = {game_id:nu_game_id,
 }
 
 
+
 function show_chars(id)
 {
   id = id.trim();
   //sessionStorage.new_char=type;
   $('#char_choose').css('display','block');
   sessionStorage.other_id=id;
-  //console.log("START GAME");
 }
 
 function writeMe()

@@ -419,8 +419,50 @@ JSON object to come out:
         ],
     };
     var init_txt = JSON.stringify(init_json);
-     game_manager.read_j(init_txt);
+     //game_manager.read_j(init_txt);
 
+     var init_json2={
+initialize:1, 
+game_id: "2475164534_238472356214",
+game_state:{
+
+  score:0,
+  health:100,
+  health_proxy:100,
+  level:0,
+  player:"Norman",
+  other_player_name:"Norman",
+  food_opened:0,
+  current_emoticons:[],
+  possible_emoticon_list:[],
+  dead:0,
+  health_timer:{},
+  level_modal_open:0,
+  message_number:0,
+  emoticon_number:0,
+  local:0,
+  cat_sleep:0,
+  head_clicked:0,
+  belly_clicked:0,
+  food_bowl_opened:0,
+  food_at_bowl:0,
+  normal_mode:1,
+  new_emoticon_pack:[],
+  fish_there:0,
+  scratching:0,
+  timeouts:{},
+  game_id:0,
+  scratch_mark:0,
+  last_timestamp:0,
+  last_health_timestamp:0,
+  interval_for_scratching:7000,
+  animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
+  displayed_cat_stage:"cat_stage",
+  },
+chat_history:[],
+};
+  var init_txt2 = JSON.stringify(init_json2);
+     //game_manager.read_j(init_txt2);
 
      </script>
 
