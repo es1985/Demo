@@ -31,6 +31,28 @@ var game_manager =
   animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
   displayed_cat_stage:"cat_stage",
   
+  achieve_state:{
+    times_food:0,
+    times_revived:0,
+    times_died:0,
+    times_scratched:0,
+    times_stppped_scratching:0,
+    times_ate_while_really_hungry:0,
+    times_slept:0,
+
+    time_played:0,
+    time_not_dying:0,
+    time_both_online:0,
+    time_without_scratching:0,
+
+    times_messaged:0,
+
+  },
+    achive_timeouts:{},
+    achievements_reached:[],
+    achievements_seen:[],
+    possible_achievements:["food_once","food_when_really_hungry","slept_once","scratched_once","stopped_scratching_once","revived_once","99_seconds_playing","9_minutes_playing",],
+
   //cat_animation_loop
 
   cat_stage:"cat_stage",                  // "swiffycontainer" <--> "cat_stage"
@@ -54,6 +76,8 @@ var game_manager =
   initialized:0,
   notifications:[0,0],
   socket:{},
+  me_name:"",
+  other_name:"",
 
 /*
   read_j: function(txt)
@@ -108,7 +132,7 @@ change_displayed_cat_stage_to:
 }
 */
   console.log("Reading JSON message");
-
+  console.log(txt);
 
     if (typeof(txt)=="string")
     {
@@ -118,8 +142,6 @@ change_displayed_cat_stage_to:
     {
       big_jason=txt;
     }
-
-    var jason = big_jason.actions;
 
     if(big_jason.initialize)
     {
@@ -134,7 +156,7 @@ change_displayed_cat_stage_to:
 
     if (big_jason.timestamp)
     {
-      this.last_timestamp=jason.timestamp;
+      this.last_timestamp=big_jason.timestamp;
     }
     else
     {
@@ -147,6 +169,8 @@ change_displayed_cat_stage_to:
       document.write("ERROR - NO SENDER");
     }
     */
+
+    var jason = big_jason.actions;
 
     if (jason.timer_stop) // ---- IMPORTANT!!!! HAS TO BE FIRST!!!
     {
@@ -173,7 +197,7 @@ change_displayed_cat_stage_to:
 
     if (jason.food_eaten)
     {
-      this.cat_ate_food(jason.food_eaten,jason.sender);
+      this.cat_ate_food(jason.food_eaten);
     }
 
     if (jason.food_at_bowl)
@@ -194,7 +218,7 @@ change_displayed_cat_stage_to:
 
        if (jason.notification)
     {
-      this.add_notification();
+      this.add_notification(big_jason.id);
     }
     
     if(jason.health)
@@ -280,7 +304,30 @@ change_displayed_cat_stage_to:
       this.change_cat_display(jason.change_displayed_cat_stage_from,jason.change_displayed_cat_stage_to);
     }
 
+    if (jason.achievements_reached)
+    {
+      this.achievements_reached=jason.achievements_reached;
+    }
+
+    if (jason.achievements_seen)
+    {
+      this.show_achievements(jason.achievements_seen);
+    }
+
+    //this.check_achievements(jason.achieve_state);
   },
+
+  show_achievements: function(achievements_seen)
+  {
+    
+    
+  },
+
+
+    add_achievement: function(achievement)
+    {
+      
+    },
 
   initialize: function(jason)
   {
@@ -326,62 +373,41 @@ change_displayed_cat_stage_to:
         ],
     }
 
-    stats update: 
-    cat v
-    health v
-    score v
-    level v
-    is sleeping v
-    is scratching v
-    scratch v
-    food bowl opened v
-    food at bowl v
-    notifications v
-    displayed_cat_stage
-
-    objects update:
-    fish v
-    emoticons
-
     */
 
-    //this.game_id=jason.game_id;
-
     this.game_id=sessionStorage.game_id;
-
     this.me_id=sessionStorage.me_id;
     this.human_id=parseInt(this.game_id.split('_')[0]);
     this.cat_id=parseInt(this.game_id.split('_')[1]);
+    this.me_name = sessionStorage.me_name.split(' ')[0];
+    this.other_name = sessionStorage.other_name.split(' ')[0];
 
     if (this.me_id==this.human_id)
     {this.cat=0;}
     else
     {this.cat=1;}
 
-    this.current_emoticons=['emo-happy','emo-mad','emo-food','emo-love','emo-night','emo-kania'];
-    console.log("JASSSSO ");
-    console.log(jason);
-
     $.each(jason.game_state, function(prop_name,val){
       if (!isNaN(parseInt(val)) && prop_name!="game_id")
       {
         game_manager[prop_name]=parseInt(val);
-        //console.log(prop_name+" - "+val);
+
       }
       else
       {
         game_manager[prop_name]=val;
-        //console.log(prop_name+" - "+val);
       }
     });
- 
+
   /*
     $.each(this.animations, function(stage_name,anim){
       //console.log(this.animations+ "  "+ anim);
       game_manager.put_animaiton_loop(anim,undefined,stage_name); // <--------SHOULD BE "GAME_MANAGER"!!!!
     });
    */
-//   console.log("CAT IS "+this.cat);
+
+       this.current_emoticons=this.current_emoticons.split(',');
+
     if(this.cat==1)
     {
       this.configure_for_cat();
@@ -414,10 +440,7 @@ change_displayed_cat_stage_to:
       this.put_animaiton_loop("cat_breathing",undefined,this.cat_stage); 
     }
 
-    this.update_notifications();
-
     this.make_scratch_mark(this.scratch_mark);
-
     this.put_food_in_bowl(this.food_at_bowl);
     
     if (this.food_bowl_opened)
@@ -434,12 +457,10 @@ change_displayed_cat_stage_to:
       }, 500, function(){});
       };
 
-      
     $("#score_number").html(this.score);
-    $("#level").html(this.level);
-    
+    $("#level").html(this.level);    
 
-
+    this.notifications=0;
 
     for(i = jason.chat_history.length; i > 0; i--)
     {
@@ -454,7 +475,14 @@ change_displayed_cat_stage_to:
 
         this.print_text(jason.chat_history[i-1].json_content,jason.chat_history[i-1].json_sender);
       }
+
+      if (!jason.chat_history[i-1].message_seen)
+      {
+        this.notifications++;
+      }
     }
+    
+    this.update_notifications();
 
     /*
     general_animation_loop:"fish_regular",
@@ -603,34 +631,9 @@ change_displayed_cat_stage_to:
     animation_manager.play_anim_loop("wanting_caress",this.cat_hidden_stage);
     animation_manager.play_anim_loop("caressing_going_on",this.cat_hidden_stage2);
 
-
-
-// ---- > Game settings ----- REDUNDANT ! ! ! ! ! 
-/*
-    console.log("this is "+sessionStorage.getItem("is_cat"));
-    this.cat=Number(sessionStorage.getItem("is_cat"));
-
-    this.adjust_health_pic();
-    this.update_health(1);
-    this.update_notifications();
-    this.possible_emoticon_list=get_possible_emoticons();
-
-    if(this.cat)
-    {
-      this.configure_for_cat();
-    }
-    else
-    {
-      this.configure_for_human(); 
-    }
-
-    $('#cat_hidden_stage').css({'display':'none'});
-    $('#cat_hidden_stage2').css({'display':'none'})
-
-    this.make_normal(); 
-  
-    */
   },
+
+
 
     clickable_on: function()
     {
@@ -671,7 +674,6 @@ change_displayed_cat_stage_to:
     $('#while-scratch-clickable').show();
   },
 
-
   configure_for_human: function()
   {
     //var hi_there = "Hi, "+this.player;
@@ -679,7 +681,9 @@ change_displayed_cat_stage_to:
     $("#health-image").hide();
     $("#text_with_food").html("would you like to send your cat some food?");
     $("#offered_food_image").attr("src",get_food_file("1"));
-    
+    $('#sleep_button').hide();
+    $('#scratch_button').hide();
+
     //$(".human-feed").on("click",open_food_thing);
     
     $("#chat-drop .orbit-container").hide();
@@ -695,12 +699,14 @@ change_displayed_cat_stage_to:
     //this.player="Pips";
     
     $("#offered_food_image").attr("src",get_food_file("1"));
-     emoticon_array=['emo-happy','emo-mad','emo-food','emo-love','emo-night','emo-kania'];
-     console.log("Putting emoticons");
+     
+   // emoticon_array=['emo-happy','emo-mad','emo-food','emo-love','emo-night','emo-kania'];
+     
+   //  this.add_emoticons(emoticon_array);
 
-    this.add_emoticons(emoticon_array);
+   this.update_emoticon_html();
 
-    this.add_modal("#landingModal");
+   this.add_modal("#landingModal");
   },
 
   sleep_clicked: function()
@@ -720,6 +726,8 @@ change_displayed_cat_stage_to:
     {
       bowl_close=1;
     }
+
+    nu_sleep = this.achieve_state.times_slept+sleep;
      var sender_dude=game_manager.get_player_name();
       var jesson =
   {
@@ -729,7 +737,7 @@ change_displayed_cat_stage_to:
     food_bowl:bowl_close,
     normal_mode:normal,
     cat_sender:this.cat,
-
+    achieve_state:{times_slept:nu_sleep},
   };
 
   var  txt = JSON.stringify(jesson);
@@ -966,7 +974,7 @@ change_displayed_cat_stage_to:
       }
       else
       {
-      
+        nu_food_times:this.achievements_state.times_food+1;
         var score_change=100;
         var sender_dude=game_manager.get_player_name();  
         var jesson =
@@ -975,6 +983,7 @@ change_displayed_cat_stage_to:
          food_eaten:this.food_at_bowl,
          score:score_change,
          cat_sender:game_manager.cat,
+         achieve_state:{times_food:nu_food_times},
         };
 
         txt=JSON.stringify(jesson);
@@ -1009,10 +1018,9 @@ change_displayed_cat_stage_to:
 
   add_emoticons: function(emotic_arr)
   {
-
-    console.log("the length "+emotic_arr.length);
     for(i = 0; i < emotic_arr.length; i++)
     {
+      console.log("JJJJJ "+this.current_emoticons);
      this.current_emoticons.push(emotic_arr[i]);
     }
     this.update_emoticon_html();
@@ -1136,8 +1144,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   scratch_clicked: function()
   {
-    
-    console.log("CLICICICI");
 
     if (this.normal_mode)
     {
@@ -1196,6 +1202,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     scratching:0,
     cat_sender:this.cat,
     timer_stop:this.cat_stage,
+    achieve_state:{times_scratched:this.achieve_state.times_scratched+1},
   };
 
   txt=JSON.stringify(jesson);
@@ -1260,6 +1267,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
      normal_mode:1,
      scratching:0,
      cat_sender:this.cat,  
+     achieve_state:{times_stppped_scratching:this.achieve_state.times_stppped_scratching+1},
     };
     txt=JSON.stringify(jesson);
     
@@ -1272,7 +1280,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     }
   },
 
-  cat_ate_food: function(accept,sender)
+  cat_ate_food: function(accept)
   {
     this.food_at_bowl=0;
     $("#food-bowl-img").attr("src",get_food_file("0",1));
@@ -1291,7 +1299,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     }
     else
     {
-      $(".food_acceptor_name").html(sender);
+      $(".food_acceptor_name").html(this.other_name);
        $("#yay").html("Yay!! ");
        $("#food_acceptor_text").html(" just had lunch!");
        $("#foodModal-approve-points").html(" +100 Points! ");
@@ -1327,7 +1335,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     this.food_at_bowl=food_sent;
   },
 
-  add_notification: function()
+
+  add_notification: function(json_id)
   {
 
     if(!this.chat_opened)
@@ -1336,6 +1345,31 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       ion.sound.play("notification");
       this.update_notifications();
     }
+    else
+    {
+
+    if (parseInt(json_id.split('_')[3])!=this.cat)
+    {
+     
+     var sender_dude=this.get_player_name();
+     var jesson =
+    {
+     sender:sender_dude,
+     cat_sender:this.cat,
+     chat_ack:1,
+     data_type:"chat_ack",
+     };
+
+      txt=JSON.stringify(jesson);
+
+     if(this.local)
+       {  
+         this.read_j(txt);
+       }
+
+       this.send_j(txt);
+      }
+  }
   },
 
 
@@ -1343,12 +1377,34 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   {
     if (this.chat_opened)
     {
+
+      if (this.notifications>0)
+      {
+       var sender_dude=this.get_player_name();
+       var jesson =
+       {
+         sender:sender_dude,
+         cat_sender:this.cat,
+         chat_ack:1,
+         data_type:"chat_ack",
+       };
+
+      txt=JSON.stringify(jesson);
+
+         if(this.local)
+        {  
+         this.read_j(txt);
+        };
+
+        this.send_j(txt);
+      }
+
       this.notifications=0;
+
       $('.chat-notifications').hide();
     }
     else
     {
-
       if (this.notifications)
       {
         $('.chat-notifications').html(this.notifications);
@@ -1385,7 +1441,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     //this.update_notifications();
   },
 
-
   print_text: function (txt,sender)
   {
     /*
@@ -1398,11 +1453,17 @@ put_animaiton_loop: function(anim,sent_sound,stage)
             </li>
     */
     var text_class = "other-message";
-    if (this.player==sender)
+    if (this.me_id==sender)
       {
         text_class = "own-message";
+        sender_name=this.me_name;
       }
-    var chat_message='<li class="chat-message '+text_class+'"><span class="chat-name">'+sender+'</span><span class="chat-single-message">'+txt+'</span></li>';
+      else
+      {
+        sender_name = this.other_name;
+      }
+
+    var chat_message='<li class="chat-message '+text_class+'"><span class="chat-name">'+sender_name+'</span><span class="chat-single-message">'+txt+'</span></li>';
     $(".chat-thread").append(chat_message);
     this.message_number++;
     $(".chat-message")[this.message_number-1].scrollIntoView();
@@ -1416,12 +1477,17 @@ put_animaiton_loop: function(anim,sent_sound,stage)
  put_emoticon: function(emoti,sender)
   {
     var text_class = "other-message";
-    if (this.player==sender)
+    if (this.me_id==sender)
       {
         text_class = "own-message";
+        sender_name=this.me_name;
+      }
+      else
+      {
+        sender_name = this.other_name;
       }
 
-    var chat_message='<li class="chat-message2 '+text_class+'"><span class="chat-name">'+sender+'</span><img class="sent-emoticon" src="'+get_emoticon_file(emoti)+'" alt="slide 1" /></li>';
+    var chat_message='<li class="chat-message2 '+text_class+'"><span class="chat-name">'+sender_name+'</span><img class="sent-emoticon" src="'+get_emoticon_file(emoti)+'" alt="slide 1" /></li>';
     $(".chat-thread").append(chat_message);
      this.emoticon_number++;
     $(".chat-message2")[this.emoticon_number-1].scrollIntoView();
@@ -1575,6 +1641,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     
     if (food)
     {
+
       var new_health=106+Math.random()*20;
       var sender_dude=this.get_player_name();  
 
@@ -1587,6 +1654,13 @@ put_animaiton_loop: function(anim,sent_sound,stage)
         cat_animation_loop:"cat_breathing",
         cat_sender:this.cat,
       }
+      if (this.health>0 && this.health<25)
+      {
+        jesson.achieve_state.times_ate_while_really_hungry=this.achieve_state.times_ate_while_really_hungry+1;
+      }
+
+      if (this.dead)
+        {jesson.achieve_state.times_revived=this.achieve_state.times_revived+1;}
 
       var  txt = JSON.stringify(jesson);
 
@@ -1693,6 +1767,9 @@ put_animaiton_loop: function(anim,sent_sound,stage)
        timer_stop:this.cat_stage,
        cat_sender:this.cat,
       };
+
+      if (!this.dead)
+        {jesson.achieve_state.times_died=this.achieve_state.times_died+1;}
 
     txt=JSON.stringify(jesson);
 
@@ -1861,18 +1938,103 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     if (!this.local)
     {
       //this.socket.emit(this.game_id, txt);   
-      console.log("EMITING");
 
        if (typeof(txt)=="string")
       {
         txt = JSON.parse(txt);
       }
-      
       txt = this.add_standards(txt);
-     
+      
+      if (txt.actions.achieve_state)
+      {
+        txt = check_achievements(txt);
+      }
+
+      console.log(txt);
       this.socket.emit(String(this.game_id), txt);
     }
   },
+
+   check_achievements: function(jason)
+    {
+      var proxy = this.achieve_state;
+       $.each(jason.actions.achieve_state, function(prop_name,val){      
+        proxy[prop_name]=jason.actions.achieve_state[prop_name];
+      });
+  // ["food_once","food_when_really_hungry","slept_once","scratched_once","revived_once","99_seconds_playing","9_minutes_playing",],
+
+      var nu_achievement=0;
+
+       if (!this.achievements_reached["food_once"])
+       {
+        if (proxy.times_food>1)
+        {
+          jason=this.nu_achievement(jason,"food_once");
+        }
+       }
+
+         if (!this.achievements_reached["food_when_really_hungry"])
+       {
+        if (proxy.times_ate_while_really_hungry>1)
+        {
+          jason=this.nu_achievement(jason,"food_when_really_hungry");
+        }
+       }
+
+         if (!this.achievements_reached["stopped_scratching_once"])
+       {
+        if (proxy.times_stppped_scratching>1)
+        {
+          jason=this.nu_achievement(jason,"stopped_scratching_once");
+        }
+       }
+
+        if (!this.achievements_reached["slept_once"])
+       {
+         if (proxy.times_slept>1)
+        {
+          jason=this.nu_achievement(jason,"slept_once");
+        }
+       }
+
+        if (!this.achievements_reached["scratched_once"])
+       {
+        if (proxy.times_scratched>1)
+        {
+          jason=this.nu_achievement(jason,"scratched_once");
+        }
+       }
+
+        if (!this.achievements_reached["revived_once"])
+       {
+           if (proxy.times_revived>1)
+        {
+          jason=this.nu_achievement(jason,"revived_once");
+        }
+       }
+
+           if (!this.achievements_reached["99_seconds_playing"])
+       {
+
+       }
+
+        if (!this.achievements_reached["9_minutes_playing"])
+       {
+        
+       }
+
+       return(jason);
+
+    },
+
+
+    nu_achievement: function(jason,nu)
+    {
+        jason.achievements_reached[nu]=1;
+        jason.achievements_seen[nu]=[0,0];
+        jason.actions.achievements_reached[nu]=1;
+        jason.actions.achievements_seen[nu]=[0,0];
+    },
 
   add_standards: function(txt)
   {
@@ -1883,34 +2045,34 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     var game_stats = {
       score:0,
       health:100,
-  health_proxy:100,
-  level:0,
-  food_opened:0,
-  current_emoticons:[],
-  possible_emoticon_list:[],
-  dead:0,
-  health_timer:{},
-  message_number:0,
-  emoticon_number:0,
-  local:0,
-  cat_sleep:0,
-  head_clicked:0,
-  belly_clicked:0,
-  food_bowl_opened:0,
-  food_at_bowl:0,
-  normal_mode:1,
-  new_emoticon_pack:[],
-  fish_there:0,
-  scratching:0,
-  timeouts:{},
-  scratch_mark:0,
-  last_timestamp:$.now(),
-  last_health_timestamp:0,
-  interval_for_scratching:7000,
-  animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
-  displayed_cat_stage:"cat_stage",
-  cat_animation_loop:'cat_breathing',
-  };
+      health_proxy:100,
+      level:0,
+      food_opened:0,
+      current_emoticons:[],
+      possible_emoticon_list:[],
+      dead:0,
+      health_timer:{},
+      message_number:0,
+      emoticon_number:0,
+      local:0,
+      cat_sleep:0,
+      head_clicked:0,
+      belly_clicked:0,
+      food_bowl_opened:0,
+      food_at_bowl:0,
+      normal_mode:1,
+      new_emoticon_pack:[],
+      fish_there:0,
+      scratching:0,
+      timeouts:{},
+      scratch_mark:0,
+      last_timestamp:$.now(),
+      last_health_timestamp:0,
+      interval_for_scratching:7000,
+      animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
+      displayed_cat_stage:"cat_stage",
+      cat_animation_loop:'cat_breathing',
+    };
 
    $.each(game_stats, function(prop_name,val){      
      game_stats[prop_name]=game_manager[prop_name];
@@ -1920,28 +2082,30 @@ put_animaiton_loop: function(anim,sent_sound,stage)
      game_stats[prop_name]=jason.actions[prop_name];
     });
 
-   if (!txt.no_game_state)
-   {
-    jason.game_state = game_stats;
-    jason.data_type="game";
+   jason.actions.sender = this.me_id;
+
+    game_stats.current_emoticons = JSON.stringify(game_stats.current_emoticons);   
+
+   if (!txt.data_type)
+    {
+      jason.game_state = game_stats;
+      jason.data_type="game";
     }
     else
     {
-      jason.data_type="chat_message";
+      jason.data_type=txt.data_type;
     }
 
     jason.game_id=this.game_id;
     jason.human_id=this.human_id;
     jason.sent_by=this.cat;
-    // jason.human_id=this.game_id.split('_')[0];
-    // jason.cat_id=this.game_id.split('_')[1];
     jason.cat_id=this.cat_id;
     jason.timestamp=$.now();
+    jason.id = jason.game_id+'_'+jason.timestamp+'_'+this.cat;
     jason.date_time=new Date(jason.timestamp);
     //txt = JSON.stringify(jason);
     return(jason);
   },
-
 
   listen_to_json: function()
   {
@@ -2081,7 +2245,7 @@ function text_submitted()
   var jesson ={
     text:submitted_txt,
     sender:sender_dude,
-    no_game_state:1,
+    data_type:"chat_message",
     score:1,
     notification:1,
     cat_sender:game_manager.cat,
@@ -2100,7 +2264,7 @@ function emoticon_clicked(emoti)
   var jesson ={
     sender:sender_dude,
     emoticon:emoti,
-    no_game_state:1,
+    data_type:"chat_message",
     score:2,
     notification:1,
     cat_sender:game_manager.cat,

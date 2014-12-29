@@ -124,6 +124,8 @@ function load_game(index)
   }
   sessionStorage.game_id=friendCache.game_mates[index].game_id;
   sessionStorage.is_cat=friendCache.game_mates[index].cat;
+  sessionStorage.other_name=friendCache.friends.data[friendCache.game_mates[index].friend_index].name;
+  
   window.location.href="game.html#";
   
 }
@@ -188,6 +190,7 @@ function getMe(callback) {
     if( !response.error ) {
       friendCache.me = response;
       sessionStorage.me_id=friendCache.me.id;
+      sessionStorage.me_name=friendCache.me.name;
        if (callback)
        {
         callback();
