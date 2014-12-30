@@ -48,9 +48,10 @@ var game_manager =
     times_messaged:0,
 
   },
+
     achive_timeouts:{},
     achievements_reached:[],
-    achievements_seen:[],
+    achievements_seen:{},
     possible_achievements:["food_once","food_when_really_hungry","slept_once","scratched_once","stopped_scratching_once","revived_once","99_seconds_playing","9_minutes_playing",],
 
   //cat_animation_loop
@@ -66,7 +67,7 @@ var game_manager =
   level_modal_open:0,
   game_id:0,
   modal_cue:[],
-  health_interval:25000,
+  health_interval:2500000,
   health_interval_while_asleep:50000,
   my_id:0,
   other_id:0,
@@ -304,13 +305,20 @@ change_displayed_cat_stage_to:
       this.change_cat_display(jason.change_displayed_cat_stage_from,jason.change_displayed_cat_stage_to);
     }
 
+
+    //jason.achievements_reached=JSON.parse(jason.achievements_reached);
+    //jason.achievements_seen=JSON.parse(jason.achievements_seen);
+
     if (jason.achievements_reached)
     {
+      console.log("REACHEd");
+       console.log(jason);
       this.achievements_reached=jason.achievements_reached;
     }
 
     if (jason.achievements_seen)
     {
+      console.log(jason.achievements_seen);
       this.show_achievements(jason.achievements_seen);
     }
 
@@ -319,14 +327,47 @@ change_displayed_cat_stage_to:
 
   show_achievements: function(achievements_seen)
   {
-    
-    
+    var seen = 1+this.cat;
+    proxy=this.achievements_seen;
+    changed=0;
+    $.each(achievements_seen, function(prop_name,val){
+      if (val<3 && val!=seen)
+      {
+        if (val>0)
+          {nu_seen=3;}
+        else
+          {nu_seen=seen;}
+
+        game_manager.put_achievement_on_modal_cue(prop_name);
+
+        proxy[prop_name]=nu_seen;
+        changed=1;
+      }
+    });
+
+    this.achievements_seen= achievements_seen;
+
+    if (changed)
+    {
+          var jesson =
+        { 
+          cat_sender:this.cat,
+          achievements_seen:proxy,
+        };
+        
+        var  txt = JSON.stringify(jesson);
+        if(game_manager.is_local())
+        {
+          game_manager.read_j(txt);
+        }
+        game_manager.send_j(txt);
+      }
   },
 
-
-    add_achievement: function(achievement)
+    put_achievement_on_modal_cue: function(achievement)
     {
-      
+      console.log("Showing Achievement Here ");
+      console.log(achievement);
     },
 
   initialize: function(jason)
@@ -374,6 +415,39 @@ change_displayed_cat_stage_to:
     }
 
     */
+
+    console.log("INTITILIZE");
+    console.log(jason);
+
+    if (!jason.possible_achievements)
+    {
+      this.achievements_reached=[];
+      this.achievements_seen={};
+      this.possible_achievements=["food_once","food_when_really_hungry","slept_once","scratched_once","stopped_scratching_once","revived_once","99_seconds_playing","9_minutes_playing",];
+
+      this.achieve_state={
+          times_food:0,
+          times_revived:0,
+          times_died:0,
+          times_scratched:0,
+          times_stppped_scratching:0,
+          times_ate_while_really_hungry:0,
+          times_slept:0,
+
+          time_played:0,
+          time_not_dying:0,
+          time_both_online:0,
+          time_without_scratching:0,
+
+          times_messaged:0,
+      };
+    }
+    else
+    {
+      this.achievements_reached = JSON.parse(jason.achievements_reached);
+      this.achievements_seen = JSON.parse(jason.achievements_seen);
+      this.achieve_state = jason.achieve_state;
+    }
 
     this.game_id=sessionStorage.game_id;
     this.me_id=sessionStorage.me_id;
@@ -1943,13 +2017,23 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       {
         txt = JSON.parse(txt);
       }
+
       txt = this.add_standards(txt);
-      
+
+
+
       if (txt.actions.achieve_state)
       {
-        txt = check_achievements(txt);
+        txt = this.check_achievements(txt);
       }
 
+      if (txt.data_type=="game")
+      {
+        txt=this.add_achieve_state(txt);
+      }
+
+      
+      console.log("Sending JSON HERE: ")
       console.log(txt);
       this.socket.emit(String(this.game_id), txt);
     }
@@ -1961,64 +2045,66 @@ put_animaiton_loop: function(anim,sent_sound,stage)
        $.each(jason.actions.achieve_state, function(prop_name,val){      
         proxy[prop_name]=jason.actions.achieve_state[prop_name];
       });
+
+       jason.actions.achievements_reached=this.achievements_reached;
+       jason.actions.achievements_seen=this.achievements_seen;
   // ["food_once","food_when_really_hungry","slept_once","scratched_once","revived_once","99_seconds_playing","9_minutes_playing",],
 
-      var nu_achievement=0;
-
-       if (!this.achievements_reached["food_once"])
+       if (this.achievements_reached.indexOf("food_once")<0)
        {
-        if (proxy.times_food>1)
+        if (proxy.times_food>0)
         {
           jason=this.nu_achievement(jason,"food_once");
         }
        }
 
-         if (!this.achievements_reached["food_when_really_hungry"])
+         if (this.achievements_reached.indexOf("food_when_really_hungry")<0)
        {
-        if (proxy.times_ate_while_really_hungry>1)
+        if (proxy.times_ate_while_really_hungry>0)
         {
           jason=this.nu_achievement(jason,"food_when_really_hungry");
         }
        }
 
-         if (!this.achievements_reached["stopped_scratching_once"])
+         if (this.achievements_reached.indexOf("stopped_scratching_once")<0)
        {
-        if (proxy.times_stppped_scratching>1)
+        if (proxy.times_stppped_scratching>0)
         {
           jason=this.nu_achievement(jason,"stopped_scratching_once");
         }
        }
 
-        if (!this.achievements_reached["slept_once"])
+       if (this.achievements_reached.indexOf("slept_once")<0)
        {
-         if (proxy.times_slept>1)
+        console.log("SLEEPY ");
+         if (proxy.times_slept>0)
         {
           jason=this.nu_achievement(jason,"slept_once");
         }
        }
 
-        if (!this.achievements_reached["scratched_once"])
+        if (this.achievements_reached.indexOf("scratched_once")<0)
        {
-        if (proxy.times_scratched>1)
+        if (proxy.times_scratched>0)
         {
           jason=this.nu_achievement(jason,"scratched_once");
         }
        }
 
-        if (!this.achievements_reached["revived_once"])
+       if (this.achievements_reached.indexOf("revived_once")<0)
        {
-           if (proxy.times_revived>1)
+           if (proxy.times_revived>0)
         {
           jason=this.nu_achievement(jason,"revived_once");
         }
        }
 
-           if (!this.achievements_reached["99_seconds_playing"])
+      if (this.achievements_reached.indexOf("99_seconds_playing")<0)
        {
 
        }
 
-        if (!this.achievements_reached["9_minutes_playing"])
+      if (this.achievements_reached.indexOf("9_minutes_playing")<0)
        {
         
        }
@@ -2030,10 +2116,12 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
     nu_achievement: function(jason,nu)
     {
-        jason.achievements_reached[nu]=1;
-        jason.achievements_seen[nu]=[0,0];
-        jason.actions.achievements_reached[nu]=1;
-        jason.actions.achievements_seen[nu]=[0,0];
+       // jason.achievements_reached.push(nu);
+       // jason.achievements_seen[nu]=0;  // 0 - no one saw. 1 - cat saw. 2 - human saw. 3 - both saw
+        jason.actions.achievements_reached.push(nu);
+        jason.actions.achievements_seen[nu]=0; // 0 - no one saw. 1 - cat saw. 2 - human saw. 3 - both saw
+
+        return(jason);
     },
 
   add_standards: function(txt)
@@ -2072,10 +2160,13 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
       displayed_cat_stage:"cat_stage",
       cat_animation_loop:'cat_breathing',
-    };
+
+      };
 
    $.each(game_stats, function(prop_name,val){      
-     game_stats[prop_name]=game_manager[prop_name];
+      if (prop_name!="achieve_state")     
+     {game_stats[prop_name]=game_manager[prop_name];}
+
     });
 
    $.each(jason.actions, function(prop_name,val){      
@@ -2105,6 +2196,48 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     jason.date_time=new Date(jason.timestamp);
     //txt = JSON.stringify(jason);
     return(jason);
+  },
+
+  add_achieve_state: function(txt)
+  {
+     achieve_state={
+    times_food:0,
+    times_revived:0,
+    times_died:0,
+    times_scratched:0,
+    times_stppped_scratching:0,
+    times_ate_while_really_hungry:0,
+    times_slept:0,
+
+    time_played:0,
+    time_not_dying:0,
+    time_both_online:0,
+    time_without_scratching:0,
+
+    times_messaged:0,
+  };
+
+  $.each(achieve_state, function(prop_name,val){      
+     achieve_state[prop_name]=game_manager.achieve_state[prop_name];
+    });
+
+
+  if (txt.actions.achieve_state)
+  {
+   $.each(txt.actions.achieve_state, function(prop_name,val){      
+     achieve_state[prop_name]=txt.actions.achieve_state[prop_name];
+    });
+ }
+ console.log("AAAAH");
+   console.log(JSON.stringify(txt.actions.achievements_reached));
+    txt.achievements_reached=JSON.stringify(txt.actions.achievements_reached);
+    txt.achievements_seen=JSON.stringify(txt.actions.achievements_seen);
+
+    txt.possible_achievements=JSON.stringify(this.possible_achievements);
+
+    txt.achieve_state = JSON.stringify(achieve_state);    
+ 
+    return(txt);
   },
 
   listen_to_json: function()
