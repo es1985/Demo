@@ -16,7 +16,7 @@ var game_manager =
   cat_sleep:0,
   head_clicked:0,
   belly_clicked:0,
-  food_bowl_opened:0,
+  food_opened:0,
   food_at_bowl:0,
   normal_mode:1,
   fish_there:0,
@@ -122,7 +122,7 @@ cat_sleep: 0,1
 head_clicked:0,1
 belly_clicked:0,1
 cat_sender:0,1
-food_bowl:0,1
+food_opened:0,1
 sent_sound: name of sound that was sent 
 food_sent: type of food sent to food bowl (0 if nothing)
 food_eaten:1 if food was eaten
@@ -301,9 +301,9 @@ change_displayed_cat_stage_to:
       this.head_clickdown(jason.head_clicked); 
     }
 
-    if (jason.food_bowl)
+    if (jason.food_opened==1 || jason.food_opened===0)
     {
-      this.open_close_food_bowl();
+      this.open_close_food_bowl(jason.food_opened);
     }
 
     if (jason.change_displayed_cat_stage_from && jason.change_displayed_cat_stage_to)
@@ -311,15 +311,19 @@ change_displayed_cat_stage_to:
       this.change_cat_display(jason.change_displayed_cat_stage_from,jason.change_displayed_cat_stage_to);
     }
 
+      console.log("achievements_reached");
+    console.log(jason.achievements_reached);
+
     if (jason.achievements_reached)
     {
       this.achievements_reached=jason.achievements_reached;
+      this.put_achievement_on_modal_cue(jason.achievements_reached); // ----> This is the replacement for seen, cause it was causing error
     }
 
     if (jason.achievements_seen)
     {
-      console.log(jason.achievements_seen);
-      this.show_achievements(jason.achievements_seen);
+     // console.log(jason.achievements_seen);
+     // this.show_achievements(jason.achievements_seen);
     }
 
     //this.check_achievements(jason.achieve_state);
@@ -327,6 +331,7 @@ change_displayed_cat_stage_to:
 
   show_achievements: function(achievements_seen)
   {
+    /*
     var seen = 1+this.cat;
     proxy=this.achievements_seen;
     changed=0;
@@ -370,13 +375,12 @@ change_displayed_cat_stage_to:
         }
         game_manager.send_j(txt);
       }
+
+      */
   },
 
     put_achievement_on_modal_cue: function(achievement)
     {
-      console.log("Showing Achievement Here ");
-      console.log(achievement);
-
       this.add_modal('#achive-modal');
       this.achieve_modal_open=1;
     },
@@ -406,7 +410,7 @@ change_displayed_cat_stage_to:
         message_number:0,
         emoticon_number:0,
         cat_sleep:0,
-        food_bowl_opened:0,
+        food_opened:0,
         food_at_bowl:0,
         normal_mode:1,
         new_emoticon_pack:[],
@@ -468,12 +472,14 @@ change_displayed_cat_stage_to:
       else
         {this.achievements_seen = jason.achievements_seen;}
 
+      console.log("ACHIEVE")
+      console.log(jason.achieve_state)
+
       if (typeof(jason.achieve_state)=="string")
         {this.achieve_state = JSON.parse(jason.achieve_state);}
       else
         {this.achieve_state = jason.achieve_state;}
     }
-
 
 
     this.game_id=sessionStorage.game_id;
@@ -496,6 +502,7 @@ change_displayed_cat_stage_to:
         game_manager[prop_name]=val;
       }
     });
+
 
   /*
     $.each(this.animations, function(stage_name,anim){
@@ -537,11 +544,12 @@ change_displayed_cat_stage_to:
     {
       this.put_animaiton_loop("cat_breathing",undefined,this.cat_stage); 
     }
+    
 
     this.make_scratch_mark(this.scratch_mark);
     this.put_food_in_bowl(this.food_at_bowl);
     
-    if (this.food_bowl_opened)
+    if (this.food_opened)
     {
       this.open_close_food_bowl();
       $('.food-bowl').animate({
@@ -579,7 +587,7 @@ change_displayed_cat_stage_to:
         this.notifications++;
       }
     }
-    
+
     this.update_notifications();
 
     /*
@@ -606,6 +614,7 @@ change_displayed_cat_stage_to:
 
     console.log("Current Emoti");
     console.log(this.current_emoticons);
+
 
     this.possible_emoticon_list=get_possible_emoticons();
 
@@ -838,7 +847,7 @@ change_displayed_cat_stage_to:
       anim="cat_breathing";
     }
 
-    if (this.food_bowl_opened && sleep)
+    if (this.food_opened && sleep)
     {
       bowl_close=1;
     }
@@ -851,7 +860,7 @@ change_displayed_cat_stage_to:
     sender:sender_dude,
     cat_sleep:sleep,
     cat_animation_loop:anim,
-    food_bowl:bowl_close,
+    food_opened:bowl_close,
     normal_mode:normal,
     cat_sender:this.cat,
     achieve_state:{times_slept:nu_sleep,},
@@ -1061,24 +1070,21 @@ change_displayed_cat_stage_to:
   },
 
 
-   open_close_food_bowl: function()
+   open_close_food_bowl: function(opened)
    {
-    
-    if (this.food_bowl_opened)
+    this.food_opened = opened;
+    if (opened)
     {
 
       $('.food-bowl').animate({
-        left:"-50vw",
+        left:"0vw",
       }, 500, function(){});
-      this.food_bowl_opened=0;
     }
     else
     {
-      $('.food-bowl').animate({
-        left:"0vw",
+        $('.food-bowl').animate({
+        left:"-50vw",
       }, 500, function(){});
-      this.food_bowl_opened=1;
-      
     }
    },
 
@@ -1093,25 +1099,31 @@ change_displayed_cat_stage_to:
       else
       {
         //nu_food_times:this.achieve_state.times_food+1;
-        var score_change=100;
-        var sender_dude=game_manager.get_player_name();  
-        var jesson =
+        if (this.cat)
         {
-         sender:sender_dude,
-         food_eaten:this.food_at_bowl,
-         score:score_change,
-         cat_sender:game_manager.cat,
-         achieve_state:{times_food:this.achieve_state.times_food+1},
-        };
+            var score_change=100;
+            var sender_dude=game_manager.get_player_name();  
+            var jesson =
+            {
+             sender:sender_dude,
+             food_eaten:this.food_at_bowl,
+             // score:score_change,
+             cat_sender:game_manager.cat,
+             // achieve_state:{times_food:this.achieve_state.times_food+1},
+            };
 
-        txt=JSON.stringify(jesson);
+            console.log("Achieve State");
+            console.log(this.achieve_state);
 
-         if(this.local)
-         {  
-           this.read_j(txt);
-         }
+            txt=JSON.stringify(jesson);
 
-        this.send_j(txt);
+             if(this.local)
+             {  
+               this.read_j(txt);
+             }
+
+            this.send_j(txt);
+        }
       }
     }
     else
@@ -1437,11 +1449,20 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   food_bowl_button_clicked: function()
   {
     var sender_dude=this.get_player_name();
+    if (this.food_opened)
+    {
+      nu_opened = 0;
+    }
+    else
+    {
+      nu_opened = 1;
+    }
+
     var jesson =
   {
     sender:sender_dude,
     cat_sender:this.cat,
-    food_bowl:1,
+    food_opened:nu_opened,
   };
 
   txt=JSON.stringify(jesson);
@@ -1766,41 +1787,52 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     if (food)
     {
 
-      var new_health=106+Math.random()*20;
-      var sender_dude=this.get_player_name();  
-
-      var jesson={
-        sender:sender_dude,
-        health:new_health,
-        dead:0,
-        normal_mode:1,
-        last_health_timestamp:$.now(),
-        cat_animation_loop:"cat_breathing",
-        cat_sender:this.cat,
-      }
-      if (this.health>0 && this.health<25)
+      if (this.cat)
       {
-        jesson.achieve_state.times_ate_while_really_hungry=this.achieve_state.times_ate_while_really_hungry+1;
-      }
+        console.log("Ahieve State Here in the cat thing");
+        console.log(this.achieve_state);
 
-      if (this.dead)
-        {jesson.achieve_state.times_revived=this.achieve_state.times_revived+1;}
+        var new_health=106+Math.random()*20;
+        var sender_dude=this.get_player_name();  
 
-      var  txt = JSON.stringify(jesson);
+        score_change=100;
 
-      if(this.local)
-      {  
-       game_manager.read_j(txt);
-      }
+        var jesson={
+          sender:sender_dude,
+          health:new_health,
+          dead:0,
+          normal_mode:1,
+          last_health_timestamp:$.now(),
+          cat_animation_loop:"cat_breathing",
+          cat_sender:this.cat,
+          score:score_change,
 
-      game_manager.send_j(txt);
-
-      //if (this.cat)
-      if(1==1)
-        {
-          window.clearInterval(this.health_timer);
-          this.set_health_timer();
+          achieve_state:{times_food:this.achieve_state.times_food+1},
         }
+        if (this.health>0 && this.health<25)
+        {
+          jesson.achieve_state.times_ate_while_really_hungry=this.achieve_state.times_ate_while_really_hungry+1;
+        }
+
+        if (this.dead)
+          {jesson.achieve_state.times_revived=this.achieve_state.times_revived+1;}
+
+        var  txt = JSON.stringify(jesson);
+
+        if(this.local)
+        {  
+         game_manager.read_j(txt);
+        }
+
+        game_manager.send_j(txt);
+
+        //if (this.cat)
+        if(1==1)
+          {
+            window.clearInterval(this.health_timer);
+            this.set_health_timer();
+          }
+      }
     }
     else
     {
@@ -1864,10 +1896,15 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       {
         $("#health-image").attr("src",get_health_file("health5"));
         //$("#cat_avatar").attr("src","img/cat-sick.png"); 
+
+         this.play_dead();
+         /*
          if (!this.dead)
          {
+
          this.play_dead();
         }
+        */
      }
     }
   },
@@ -1879,8 +1916,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   },
 
   play_dead: function()
-  {
-    
+  {  
+
       var sender_dude=game_manager.get_player_name();
       var jesson =
       {
@@ -1891,9 +1928,10 @@ put_animaiton_loop: function(anim,sent_sound,stage)
        timer_stop:this.cat_stage,
        cat_sender:this.cat,
       };
-     
+    
       if (!this.dead)
-        {jesson.achieve_state.times_died=this.achieve_state.times_died+1;}
+        {jesson.achieve_state = {};
+          jesson.achieve_state.times_died=this.achieve_state.times_died+1;}
 
     txt=JSON.stringify(jesson);
 
@@ -1936,6 +1974,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   change_score: function(change)
   {
+    console.log("Changing Score "+ this.score)
     this.score=this.score+change;
     this.adjust_level();
     $("#score_number").html(this.score);
@@ -2057,6 +2096,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     return(this.local);
   },
 
+
+
   send_j:function(txt)
   {
     if (!this.local)
@@ -2070,7 +2111,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
 
       txt = this.add_standards(txt);
-
 
 
       if (txt.actions.achieve_state)
@@ -2105,6 +2145,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
        if (!this.achievements_reached.food_once)
        {
+        console.log("FOOOOOOD"+ this.achievements_reached.food_once);
+
         if (proxy.times_food>0)
         {
           jason=this.nu_achievement(jason,"food_once");
@@ -2129,7 +2171,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
        if (!this.achievements_reached.slept_once)
        {
-        console.log("SLEEPY ");
          if (proxy.times_slept>0)
         {
           jason=this.nu_achievement(jason,"slept_once");
@@ -2196,7 +2237,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       cat_sleep:0,
       head_clicked:0,
       belly_clicked:0,
-      food_bowl_opened:0,
+      food_opened:0,
       food_at_bowl:0,
       normal_mode:1,
       fish_there:0,
@@ -2208,25 +2249,32 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       interval_for_scratching:7000,
       animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
       displayed_cat_stage:"cat_stage",
-      cat_animation_loop:'cat_breathing',
+
+     // cat_animation_loop:'cat_breathing',
      // health_timer:{},
       };
 
    $.each(game_stats, function(prop_name,val){      
-      if (prop_name!="achieve_state" && prop_name!="achievements_reached" && prop_name!="achievements_seen")     
+      if (prop_name!="achieve_state" && prop_name!="achievements_reached" && prop_name!="achievements_seen" && prop_name!="score")     
      {game_stats[prop_name]=game_manager[prop_name];}
     });
-
 
    $.each(jason.actions, function(prop_name,val){ 
    if (prop_name!="achieve_state" && prop_name!="achievements_reached" && prop_name!="achievements_seen")       
      {game_stats[prop_name]=jason.actions[prop_name];}
     });
 
+   console.log("Score");
+      console.log("this score: "+this.score+" jason "+jason.score);
+
+    if (!jason.actions.score)
+      {jason.actions.score =0;}
+
+   game_stats.score = this.score + jason.actions.score;
 
    jason.actions.sender = this.me_id;
 
-   // game_stats.animations = JSON.stringify(game_stats.animations);
+    game_stats.animations = JSON.stringify(game_stats.animations);
     game_stats.current_emoticons = JSON.stringify(game_stats.current_emoticons);  
     game_stats.possible_emoticon_list = JSON.stringify(game_stats.possible_emoticon_list); 
     //game_stats.health_timer = JSON.stringify(game_stats.health_timer)
@@ -2257,6 +2305,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   add_achieve_state: function(txt)
   {
+
+
      achieve_state={
     times_food:0,
     times_revived:0,
@@ -2273,6 +2323,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     times_messaged:0,
   };
 
+
   $.each(achieve_state, function(prop_name,val){      
      achieve_state[prop_name]=game_manager.achieve_state[prop_name];
     });
@@ -2284,20 +2335,18 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     });
  }
 
+
+
    if (txt.actions.achievements_reached)
     {txt.achievements_reached=JSON.stringify(txt.actions.achievements_reached);}
 
    if (txt.actions.achievements_seen)
-    {txt.achievements_seen=JSON.stringify(txt.actions.achievements_seen);}
+    { txt.achievements_seen=JSON.stringify(txt.actions.achievements_seen);}
 
     txt.possible_achievements=JSON.stringify(this.possible_achievements);
 
     txt.achieve_state = JSON.stringify(achieve_state);    
- 
 
-console.log('Achieve State');
-
-console.log(txt.achievements_reached);
     return(txt);
   },
 
