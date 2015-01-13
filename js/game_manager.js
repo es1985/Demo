@@ -49,13 +49,21 @@ var game_manager =
 
   },
 
-
     new_emoticon_pack:[],
     health_timer:{},
     achive_timeouts:{},
     achievements_reached:{},
     achievements_seen:{},
     possible_achievements:{food_once:1,food_when_really_hungry:1,slept_once:1,scratched_once:1,stopped_scratching_once:1,revived_once:1,},
+
+    achievement_dictionary:{
+                            food_once:["achive-modal-food","Knows Where's the Food At"],
+                            slept_once:["achive-modal-sleep","Sleepy Cat"],
+                            scratched_once:["achive-modal-scratch","Naughty Cat"],
+                            stopped_scratching_once:["achive-modal-scratch","Aware Human"],
+                            revived_once:["achive-modal-scratch","Replacing Revival"],
+                            food_when_really_hungry:["achive-modal-food","Replacement Food When Really Hungry"],
+                          },
 
   //cat_animation_loop
 
@@ -70,7 +78,9 @@ var game_manager =
   level_modal_open:0,
   game_id:0,
   modal_cue:[],
-  health_interval:2500000,
+  modal_function_cue:[],
+  modal_function_arg_cue:[],
+  health_interval:2500,
   health_interval_while_asleep:50000,
   my_id:0,
   other_id:0,
@@ -83,6 +93,7 @@ var game_manager =
   me_id:0,
   me_name:"",
   other_name:"",
+
 
 /*
   read_j: function(txt)
@@ -311,13 +322,11 @@ change_displayed_cat_stage_to:
       this.change_cat_display(jason.change_displayed_cat_stage_from,jason.change_displayed_cat_stage_to);
     }
 
-      console.log("achievements_reached");
-    console.log(jason.achievements_reached);
-
     if (jason.achievements_reached)
     {
-      this.achievements_reached=jason.achievements_reached;
-      this.put_achievement_on_modal_cue(jason.achievements_reached); // ----> This is the replacement for seen, cause it was causing error
+      // this.achievements_reached=jason.achievements_reached;
+      // this.put_achievement_on_modal_cue(jason.achievements_reached); // ----> This is the replacement for seen, cause it was causing error
+      this.show_achievements_to_be_replaced_by_seen(jason.achievements_reached);
     }
 
     if (jason.achievements_seen)
@@ -327,6 +336,21 @@ change_displayed_cat_stage_to:
     }
 
     //this.check_achievements(jason.achieve_state);
+  },
+
+  show_achievements_to_be_replaced_by_seen: function(jason_achievements_reached)
+  {
+
+    achieve_to_show = jason_achievements_reached;
+    $.each(this.achievements_reached, function(prop_name,val){
+     delete achieve_to_show[prop_name];
+    });
+    $.each(achieve_to_show, function(prop_name,val){
+    game_manager.achievements_reached[prop_name]=val;
+    game_manager.put_achievement_on_modal_cue(prop_name); 
+    });
+    
+    //this.achievements_reached=jason_achievements_reached;
   },
 
   show_achievements: function(achievements_seen)
@@ -381,13 +405,29 @@ change_displayed_cat_stage_to:
 
     put_achievement_on_modal_cue: function(achievement)
     {
-      this.add_modal('#achive-modal');
+  
+      this.add_modal('#achive-modal',"adjust_achieve_modal",this.achievement_dictionary[achievement]);
       this.achieve_modal_open=1;
+    },
+
+    figure_achievement_class_and_text: function()
+    {
+
+    },
+
+    achieve_sleep_1: function()
+    {adjust_achieve_modal("achive-modal-sleep");},
+
+    adjust_achieve_modal: function(css_class_and_text)
+    {
+      console.log("Adjusting Modal Thing to Achieve");
+      $('#achive-modal').removeClass("achive-modal-sleep achive-modal-food achive-modal-chat achive-modal-scratch achive-modal-relationship-01");
+      $('#achive-modal').addClass(css_class_and_text[0]);
+      $('.achievment-modal-details').html(css_class_and_text[1]);
     },
 
   initialize: function(jason)
   {
-
 
     /*
   Game initialization JSON:
@@ -439,7 +479,7 @@ change_displayed_cat_stage_to:
     else
     {this.cat=1;}
   */
-
+/*
     if (!jason.possible_achievements)
     {
       this.achievements_reached=[];
@@ -461,8 +501,7 @@ change_displayed_cat_stage_to:
           times_messaged:0,
       };
     }
-    else
-    {   
+    */ 
        this.achievements_reached = JSON.parse(jason.achievements_reached); 
 
        this.show_achievements(JSON.parse(jason.achievements_seen));
@@ -472,14 +511,11 @@ change_displayed_cat_stage_to:
       else
         {this.achievements_seen = jason.achievements_seen;}
 
-      console.log("ACHIEVE")
-      console.log(jason.achieve_state)
-
       if (typeof(jason.achieve_state)=="string")
         {this.achieve_state = JSON.parse(jason.achieve_state);}
       else
         {this.achieve_state = jason.achieve_state;}
-    }
+    
 
 
     this.game_id=sessionStorage.game_id;
@@ -634,8 +670,6 @@ change_displayed_cat_stage_to:
     this.other_id=sessionStorage.other_id;
     this.human_id=this.game_id.split('_')[0];
     this.cat_id=this.game_id.split('_')[1];
-
-    console.log("gmae id "+this.game_id);
 
     if (this.game_id.split('_')[0]==this.me_id)
       {
@@ -1090,6 +1124,8 @@ change_displayed_cat_stage_to:
 
    food_bowl_clicked:function()
    {
+    console.log("Food clicked");
+   // console.log(this.achievements_reached);
     if (this.cat)
     {
       if (!this.food_at_bowl)
@@ -1111,9 +1147,6 @@ change_displayed_cat_stage_to:
              cat_sender:game_manager.cat,
              // achieve_state:{times_food:this.achieve_state.times_food+1},
             };
-
-            console.log("Achieve State");
-            console.log(this.achieve_state);
 
             txt=JSON.stringify(jesson);
 
@@ -1210,8 +1243,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     }
       animation_manager.play_anim_loop(anim,stage,sent_sound);
   },
-
-
 
    send_animation_loop: function(anim)
   {
@@ -1329,7 +1360,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     //$('#scratch_image').show();
 
 
-
      var sender_dude=game_manager.get_player_name();
       var jesson =
   {
@@ -1423,6 +1453,9 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     $("#food-bowl-img").attr("src",get_food_file("0",1));
 
     // ----------::::::::>>>>>>>>>This should, at some point, be changed that the health is sent as JSON?
+
+    console.log("Cat eating food "+accept);
+
     this.update_health(accept);
 
     if (this.cat)
@@ -1684,9 +1717,19 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   },
 
 
-  add_modal: function(modal_id)
+  add_modal: function(modal_id,func,arg)
   {
     this.modal_cue.push(modal_id);
+    if (func!=undefined)
+      {this.modal_function_cue.push(func);}
+    else
+      {this.modal_function_cue.push(0);}
+
+    if (arg!=undefined)
+      {this.modal_function_arg_cue.push(arg);}
+    else
+      {this.modal_function_arg_cue.push(0);}
+
     this.operate_cue();
   },
 
@@ -1707,6 +1750,10 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       if (displayed=="none")
       { 
         $(this.modal_cue[0]).foundation('reveal', 'open');
+        if (this.modal_function_cue[0])
+        {
+          game_manager[this.modal_function_cue[0]](this.modal_function_arg_cue[0]);
+        }
       }
     }
   },
@@ -1716,6 +1763,15 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     this.modal_cue.reverse();
     this.modal_cue.pop();
     this.modal_cue.reverse();
+
+    this.modal_function_cue.reverse();
+    this.modal_function_cue.pop();
+    this.modal_function_cue.reverse();
+    
+    this.modal_function_arg_cue.reverse();
+    this.modal_function_arg_cue.pop();
+    this.modal_function_arg_cue.reverse();
+
     this.operate_cue();
   },
 
@@ -1789,8 +1845,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
       if (this.cat)
       {
-        console.log("Ahieve State Here in the cat thing");
-        console.log(this.achieve_state);
 
         var new_health=106+Math.random()*20;
         var sender_dude=this.get_player_name();  
@@ -1870,7 +1924,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   adjust_health_pic: function()
   {
-    if (this.cat)
+    //if (this.cat)
+    if (1==1)
     {
       if (this.health>=75)
       {
@@ -1908,7 +1963,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
      }
     }
   },
-
 
   set_health_timer: function()
   {
@@ -2132,14 +2186,13 @@ put_animaiton_loop: function(anim,sent_sound,stage)
    check_achievements: function(jason)
     {
       var proxy = this.achieve_state;
+       
        $.each(jason.actions.achieve_state, function(prop_name,val){      
         proxy[prop_name]=jason.actions.achieve_state[prop_name];
       });
+       //jason.actions.achievements_reached=this.achievements_reached;
 
-       console.log('Reached here is the');
-       console.log(this.achievements_reached);
-
-       jason.actions.achievements_reached=this.achievements_reached;
+       jason.actions.achievements_reached = $.extend({},this.achievements_reached);
        jason.actions.achievements_seen=this.achievements_seen;
   // ["food_once","food_when_really_hungry","slept_once","scratched_once","revived_once","99_seconds_playing","9_minutes_playing",],
 
@@ -2193,24 +2246,16 @@ put_animaiton_loop: function(anim,sent_sound,stage)
         }
        }
 
-           console.log('Check Check Achi State');
-
-      console.log(jason.achievements_reached);
-
        return(jason);
 
     },
-
 
     nu_achievement: function(jason,nu)
     {
        // jason.achievements_seen[nu]=0;  // 0 - no one saw. 1 - cat saw. 2 - human saw. 3 - both saw
  
-      jason.actions.achievements_reached[nu]=1;
+        jason.actions.achievements_reached[nu]=1;
         jason.actions.achievements_seen[nu]=0; // 0 - no one saw. 1 - cat saw. 2 - human saw. 3 - both saw
-
-        console.log('Adding Achievement');
-        console.log(jason.actions.achievements_reached);
 
         return(jason);
     },

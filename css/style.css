@@ -21,7 +21,7 @@ background-repeat: no-repeat;
 login
 ************************************/
 .index-inviter-login-wrapper{
-background: url('../img/choose-back.png');
+background: url('./img/choose-back.png');
 background-size: cover;
 background-repeat: no-repeat;
 }
