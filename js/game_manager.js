@@ -8,7 +8,7 @@ var game_manager =
   level:0,
   food_opened:0,
   current_emoticons:{},
-  possible_emoticon_list:{},
+  possible_emoticons_list:{},
   dead:0,
   message_number:0,
   emoticon_number:0,
@@ -49,7 +49,7 @@ var game_manager =
 
   },
 
-    new_emoticon_pack:[],
+   
     health_timer:{},
     achive_timeouts:{},
     achievements_reached:{},
@@ -57,12 +57,12 @@ var game_manager =
     possible_achievements:{food_once:1,food_when_really_hungry:1,slept_once:1,scratched_once:1,stopped_scratching_once:1,revived_once:1,},
 
     achievement_dictionary:{
-                            food_once:["achive-modal-food","Knows Where's the Food At"],
-                            slept_once:["achive-modal-sleep","Sleepy Cat"],
-                            scratched_once:["achive-modal-scratch","Naughty Cat"],
-                            stopped_scratching_once:["achive-modal-scratch","Aware Human"],
-                            revived_once:["achive-modal-scratch","Replacing Revival"],
-                            food_when_really_hungry:["achive-modal-food","Replacement Food When Really Hungry"],
+                            food_once:["achive-modal-food","Knows Where's the Food At","img/achievements/food01.png"],
+                            slept_once:["achive-modal-sleep","Sleepy Cat","img/achievements/sleep01.png"],
+                            scratched_once:["achive-modal-scratch","Naughty Cat","img/achievements/scratch01.png"],
+                            stopped_scratching_once:["achive-modal-scratch","Aware Human","img/achievements/scratch-02.png"],
+                            revived_once:["achive-modal-scratch","Replacing Revival","img/achievements/food02.png"],
+                            food_when_really_hungry:["achive-modal-food","Replacement Food When Really Hungry","img/achievements/food-03.png"],
                           },
 
   //cat_animation_loop
@@ -75,12 +75,13 @@ var game_manager =
   player:"Norman",
   other_player_name:"Norman",
 
+  new_emoticon_pack:{},
   level_modal_open:0,
   game_id:0,
   modal_cue:[],
   modal_function_cue:[],
   modal_function_arg_cue:[],
-  health_interval:2500,
+  health_interval:250000,
   health_interval_while_asleep:50000,
   my_id:0,
   other_id:0,
@@ -93,7 +94,6 @@ var game_manager =
   me_id:0,
   me_name:"",
   other_name:"",
-
 
 /*
   read_j: function(txt)
@@ -241,6 +241,7 @@ change_displayed_cat_stage_to:
     
     if(jason.health)
     {
+          console.log("Reading Health at all?!? "+this.health);
       this.health_me(jason.health);
     }
 
@@ -277,7 +278,7 @@ change_displayed_cat_stage_to:
 
     if(jason.dead)
     {
-      this.dead=1;
+      this.dead=jason.dead;
       this.score=0;
       this.level=0;
     }
@@ -334,9 +335,12 @@ change_displayed_cat_stage_to:
      // console.log(jason.achievements_seen);
      // this.show_achievements(jason.achievements_seen);
     }
-
+    
+    console.log("Now Reading Health is "+this.health);
+    
     //this.check_achievements(jason.achieve_state);
   },
+
 
   show_achievements_to_be_replaced_by_seen: function(jason_achievements_reached)
   {
@@ -424,14 +428,15 @@ change_displayed_cat_stage_to:
       $('#achive-modal').removeClass("achive-modal-sleep achive-modal-food achive-modal-chat achive-modal-scratch achive-modal-relationship-01");
       $('#achive-modal').addClass(css_class_and_text[0]);
       $('.achievment-modal-details').html(css_class_and_text[1]);
+      $('#achieve_image').attr("src",css_class_and_text[2]);
     },
 
   initialize: function(jason)
   {
 
     /*
-  Game initialization JSON:
-    
+  Game initialization JSON
+
   {
     game_state:{
         cat:1,
@@ -442,7 +447,7 @@ change_displayed_cat_stage_to:
         player:"Norman",
         other_player_name:"Norman",
         current_emoticons:[],
-        possible_emoticon_list:[],
+        possible_emoticons_list:[],
         notifications:0,
         dead:0,
         health_timer:{},
@@ -525,19 +530,22 @@ change_displayed_cat_stage_to:
     this.me_name = sessionStorage.me_name.split(' ')[0];
     this.other_name = sessionStorage.other_name.split(' ')[0];
 
-    
-
+       
     $.each(jason.game_state, function(prop_name,val){
       if (!isNaN(parseInt(val)) && prop_name!="game_id")
       {
         game_manager[prop_name]=parseInt(val);
-
+        //console.log("Init Stat "+ prop_name + " - "+ val);
       }
       else
       {
         game_manager[prop_name]=val;
       }
+
+
     });
+
+
 
 
   /*
@@ -560,6 +568,7 @@ change_displayed_cat_stage_to:
 
     this.make_normal();
 
+
     if (this.scratching)
     {
       if (($.now()-this.last_timestamp)<this.interval_for_scratching)
@@ -580,27 +589,30 @@ change_displayed_cat_stage_to:
     {
       this.put_animaiton_loop("cat_breathing",undefined,this.cat_stage); 
     }
-    
 
     this.make_scratch_mark(this.scratch_mark);
     this.put_food_in_bowl(this.food_at_bowl);
     
+
     if (this.food_opened)
     {
-      this.open_close_food_bowl();
+      //this.open_close_food_bowl();
       $('.food-bowl').animate({
         left:"0vw",
       }, 500, function(){});
     }
     else
-      {
+    {
         $('.food-bowl').animate({
         left:"-50vw",
-      }, 500, function(){});
-      };
+        }, 500, function(){});
+    };
 
     $("#score_number").html(this.score);
     $("#level").html(this.level);    
+
+ console.log("Food Opened HERE "+this.food_opened);
+
 
     this.notifications=0;
 
@@ -652,7 +664,7 @@ change_displayed_cat_stage_to:
     console.log(this.current_emoticons);
 
 
-    this.possible_emoticon_list=get_possible_emoticons();
+    this.possible_emoticons_list=get_possible_emoticons();
 
     this.initialized=1;
 
@@ -660,6 +672,22 @@ change_displayed_cat_stage_to:
     //this.update_health(1);
     //this.update_notifications();
     
+// ------->>>>> Death Simulation!!!! !!! !!! !!! !! !! !! !
+
+if (this.cat)
+{
+  /*
+     var death_jason={
+        
+        health:-90,
+        last_health_timestamp:$.now(),
+        cat_sender:this.cat,
+      }
+
+       this.send_j(jason);
+       */
+}
+
   },
 
   onload_game: function()
@@ -842,7 +870,8 @@ change_displayed_cat_stage_to:
     $("#offered_food_image").attr("src",get_food_file("1"));
     $('#sleep_button').hide();
     $('#scratch_button').hide();
-
+    $('#food_bowl_button').addClass('human-action-feedme');
+    $('.chat-thread').addClass('human-chat-thread');
     //$(".human-feed").on("click",open_food_thing);
     
     $("#chat-drop .orbit-container").hide();
@@ -1455,25 +1484,25 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     // ----------::::::::>>>>>>>>>This should, at some point, be changed that the health is sent as JSON?
 
     console.log("Cat eating food "+accept);
+    console.log("Health here is  "+this.health);
 
     this.update_health(accept);
 
+
+    console.log("After the update health is  "+this.health);
+
+    $("#approve-img").attr("src","img/food-approve-img.png");
+    $("#food_acceptor_text").html(" just had lunch!");
+    $("#foodModal-approve-points").html(" +100 ");
+    $("#yay").html("Yay!!!!!! ");
+
     if (this.cat)
     {
-      $(".food_acceptor_name").html("You");
-      $("#yay").html("Yay!!!!!! ");
-      $("#approve-img").attr("src","img/food-approve-img.png");
-      $("#food_acceptor_text").html(" just had lunch!");
-      $("#foodModal-approve-points").html("+100");
-      
+      $(".food_acceptor_name").html("You");  
     }
     else
     {
       $(".food_acceptor_name").html(this.other_name);
-       $("#yay").html("Yay!! ");
-       $("#food_acceptor_text").html(" just had lunch!");
-       $("#foodModal-approve-points").html(" +100 Points! ");
-      
     }
       //this.open_food_thing=1;
       this.add_modal("#foodModal-approve");
@@ -1513,7 +1542,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     $("#food-bowl-img").attr("src",get_food_file(food_sent,1));
     this.food_at_bowl=food_sent;
   },
-
 
   add_notification: function(json_id)
   {
@@ -1777,14 +1805,20 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   accept_food: function(accept,sender)
   {
+
+ console.log("ZZZZZZZZZZJJJJJJJJJ");
+
     this.update_health(accept);
+     $("#approve-img").attr("src","img/food-approve-img.png");
+
+    
     if (this.cat)
     {
       $(".food_acceptor_name").html("You");
       if(accept)
       {
+
        $("#yay").html("Yay!!!!!! ");
-       $("#approve-img").attr("src","img/food-approve-img.png");
        $("#food_acceptor_text").html(" just had lunch!");
        $("#foodModal-approve-points").html("+100");
       }
@@ -1832,13 +1866,13 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   health_me: function(new_health)
   {
     this.health=new_health;
+    console.log("New Health Baby ! ! "+this.health);
     this.adjust_health_pic();
   },
 
 
   update_health: function(food)
   {
-   
     
     if (food)
     {
@@ -1925,6 +1959,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   adjust_health_pic: function()
   {
     //if (this.cat)
+
+    console.log("Adjusting health pic "+this.health);
     if (1==1)
     {
       if (this.health>=75)
@@ -1972,6 +2008,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   play_dead: function()
   {  
 
+      console.log("Death");
       var sender_dude=game_manager.get_player_name();
       var jesson =
       {
@@ -2019,6 +2056,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   adjust_level: function()
   {
+    console.log("Adjusting level");
     if (this.decide_level()>this.level)
     {
       this.leveled_up(this.decide_level()-this.level);
@@ -2028,10 +2066,12 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   change_score: function(change)
   {
-    console.log("Changing Score "+ this.score)
+    console.log("Score Before change "+ this.score + " / "+ change);
     this.score=this.score+change;
     this.adjust_level();
     $("#score_number").html(this.score);
+  
+    console.log("Score After Change "+ this.score);
   },
 
   leveled_up: function(up)
@@ -2090,12 +2130,17 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   adjust_modal_to_choose_emoticons: function()
   {
-  $.each(this.possible_emoticon_list, function(emotic_name,val){
-      if(!this.current_emoticons[emotic_name])
+    console.log("current emoticons here here");
+    console.log(this.current_emoticons);
+  $.each(this.possible_emoticons_list, function(emotic_name,val){
+     
+      if(!game_manager.current_emoticons[emotic_name] || game_manager.current_emoticons[emotic_name]===undefined)
       {
         var emoticon_choice='<li class="emoticon-choice" ><img id="emoticon-choice-'+emotic_name+'" onclick="javascript:game_manager.emoticon_chosen(&#39'+emotic_name+'&#39)" src="'+get_emoticon_file(emotic_name)+'"></li>';
         $("#choose_new_emoticons_area").append(emoticon_choice);
       }
+
+      
     });
   },
 
@@ -2274,7 +2319,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       level:0,
       food_opened:0,
       current_emoticons:{},
-      possible_emoticon_list:{},
+      possible_emoticons_list:{},
       dead:0,
       message_number:0,
       emoticon_number:0,
@@ -2302,11 +2347,17 @@ put_animaiton_loop: function(anim,sent_sound,stage)
    $.each(game_stats, function(prop_name,val){      
       if (prop_name!="achieve_state" && prop_name!="achievements_reached" && prop_name!="achievements_seen" && prop_name!="score")     
      {game_stats[prop_name]=game_manager[prop_name];}
+
+    //console.log("Game Stat "+prop_name + " - "+game_manager[prop_name]);
+
     });
 
    $.each(jason.actions, function(prop_name,val){ 
    if (prop_name!="achieve_state" && prop_name!="achievements_reached" && prop_name!="achievements_seen")       
      {game_stats[prop_name]=jason.actions[prop_name];}
+
+   console.log("Action "+prop_name + " - " +jason.actions[prop_name]);
+
     });
 
    console.log("Score");
@@ -2321,7 +2372,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
     game_stats.animations = JSON.stringify(game_stats.animations);
     game_stats.current_emoticons = JSON.stringify(game_stats.current_emoticons);  
-    game_stats.possible_emoticon_list = JSON.stringify(game_stats.possible_emoticon_list); 
+    game_stats.possible_emoticons_list = JSON.stringify(game_stats.possible_emoticons_list); 
     //game_stats.health_timer = JSON.stringify(game_stats.health_timer)
 
    if (!txt.data_type)
@@ -2350,8 +2401,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   add_achieve_state: function(txt)
   {
-
-
      achieve_state={
     times_food:0,
     times_revived:0,
@@ -2456,9 +2505,9 @@ function get_emoticon_file(txt)
 
 function get_possible_emoticons()
 {
- // var possible_emoticon_list=["emo-happy","emo-love","emo-dayan","emo-hipster","emo-kania","emo-mad","emo-night","emo-pilot","emo-worried","emo-food","emo-blue","emo-froid","emo-pig","emo-angel","emo-shark"];
-  var possible_emoticon_list={"emo-happy":1,"emo-love":1,"emo-dayan":1,"emo-hipster":1,"emo-kania":1,"emo-mad":1,"emo-night":1,"emo-pilot":1,"emo-worried":1,"emo-food":1,"emo-blue":1,"emo-froid":1,"emo-pig":1,"emo-angel":1,"emo-shark":1};
-  return(possible_emoticon_list);
+ // var possible_emoticons_list=["emo-happy","emo-love","emo-dayan","emo-hipster","emo-kania","emo-mad","emo-night","emo-pilot","emo-worried","emo-food","emo-blue","emo-froid","emo-pig","emo-angel","emo-shark"];
+  var possible_emoticons_list={"emo-happy":1,"emo-love":1,"emo-dayan":1,"emo-hipster":1,"emo-kania":1,"emo-mad":1,"emo-night":1,"emo-pilot":1,"emo-worried":1,"emo-food":1,"emo-blue":1,"emo-froid":1,"emo-pig":1,"emo-angel":1,"emo-shark":1};
+  return(possible_emoticons_list);
 };
 
 

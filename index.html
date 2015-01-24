@@ -115,29 +115,48 @@ var socket=io();
     <div class="small-12 columns games">
       <h1 class="choose-title">pips</h1>
       <!-- <h2 class="start-games">You have <span class"game-left-count">3</span> invitations left!</h2> -->
-      <h2 class="start-games">start a game</h2> 
+      
+
+
+    <a id="main-invite" class="small-12 columns" onclick="on_invite()"> INVITE A FRIEND </a>
+
+
+<!--
+
       <ul id="char_choose" class="choose-character inline-list" style="display:none">
         <li><p class="choose-cat" onclick="char_chosen(1)" id="anim" style="position:auto;"><img src="img/choose-cat.png"></p></li>
         <li><p class="choose-human" onclick="char_chosen(0)" id="anim" style="position:auto;"><img src="img/choose-man.png"></p></li>
       </ul>
+-->
 
+   <div id="choose_modal" class="reveal-modal message-modal" data-reveal>
+         <ul id="char_choose" class="choose-character">
+        <li><p class="choose-cat" onclick="char_chosen(1)" id="anim" style="position:auto;"><img src="img/choose-cat.png"></p></li>
+        <li><p class="choose-human" onclick="char_chosen(0)" id="anim" style="position:auto;"><img src="img/choose-man.png"></p></li>
+      </ul>
+      </div>
+
+<!--
       <ul id="ongoing_games" class="games-list small-12 columns">
-        <li class="row games-list-head">Games</li>
+        <li class="row games-list-head">Current Games</li>
       
     </ul>
-
+-->
 
     <ul id="available_friends_list" class="games-list small-12 columns">
-        <li class="row games-list-head">Friends Playing</li>
+       <!-- <li class="row games-list-head">Start A New Game</li> -->
       
     </ul>
-
-    <a id="main-invite" class="small-12 columns" onclick="on_invite()"> INVITE </a>
 
     <ul id="invite_list" class="games-list small-12 columns">
         <li class="row games-list-head">Invite These Friends</li>
       
     </ul>
+
+<div id="fb-wrapper">
+<div id="fb-root">
+</div> 
+</div>
 
       <!--
 
@@ -190,5 +209,15 @@ var socket=io();
 
 ZZZhmmmm
 -->
+
+
+  <script src="js/vendor/jquery.js"></script>
+  <script src="js/foundation/foundation.js"></script>
+  <script src="js/foundation/foundation.dropdown.js"></script>
+  <script src="js/foundation/foundation.orbit.js"></script>
+  <script src="js/foundation/foundation.reveal.js"></script>
+  <!-- <script src="js/vendor/jQuery.html5Loader.js"></script> -->
+
+
 </body>
 </html>

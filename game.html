@@ -93,9 +93,9 @@ JSON object to come out:
       <span id="level">00</span>
     </span>
   </a>
-
+<span><a id="back_to_mainscreen" class="back-to-games" href="index.html"><i class="fa fa-arrow-left"></i></a></span>
   <!-- achievements -->
-  <div id="points-drop" data-dropdown-content class="f-dropdown content" aria-hidden="true" tabindex="-1">
+ <div id="points-drop" data-dropdown-content class="f-dropdown content" aria-hidden="true" tabindex="-1">
     <ul class="" style="list-style:none;margin:0px;">
     <li><p class="modal-header">Achievements</p></li>
     <li class="achievement-thread">
@@ -193,7 +193,7 @@ JSON object to come out:
   <ul class="cat-actions">
     <li class="cat-action cat-action-sleep"><button id="sleep_button" onclick="javascript:game_manager.sleep_clicked()"><i class="fa fa-moon-o"></i></button></li>
     <li class="cat-action cat-action-scratch" id="scratch_button" onclick="javascript:game_manager.scratch_clicked()"><button><i class="fa fa-paw"></i></button></li>
-    <li class="cat-action cat-action-feedme"><a id="food_bowl_button" href="#" onclick="javascript:game_manager.food_bowl_button_clicked()"><img src="img/feedme.png"></a></li>
+    <li id="food_bowl_button" class="cat-action cat-action-feedme"><a id="food_bowl_button" href="#" onclick="javascript:game_manager.food_bowl_button_clicked()"><img src="img/feedme.png"></a></li>
   </ul>
   
   <a class="food-bowl" onclick="javascript:game_manager.food_bowl_clicked()" href="#"><img id="food-bowl-img" src="img/foodbal-empty.png"></a>
@@ -245,7 +245,7 @@ JSON object to come out:
         <p class="lead">achiement locked! <span class="achievment-modal-details">sleep 1st time</span></p>
       </li>
     </ul>
-    <p class="text-center achieve-modal-img"><img src="img/achievments/sleep01.png"></p>
+    <p class="text-center achieve-modal-img"><img id="achieve_image" src="img/achievments/sleep01.png"></p>
     <a class="close-reveal-modal approval-close" id="">ok</a>
   </div>
 
