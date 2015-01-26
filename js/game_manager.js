@@ -5,7 +5,7 @@ var game_manager =
   score:0,
   health:100,
   health_proxy:100,
-  level:0,
+  level:1,
   food_opened:0,
   current_emoticons:{},
   possible_emoticons_list:{},
@@ -616,6 +616,8 @@ change_displayed_cat_stage_to:
 
     this.notifications=0;
 
+    console.log("chat History");
+    
     for(i = jason.chat_history.length; i > 0; i--)
     {
       jason.chat_history[i-1][jason.json_content_type]=jason.json_content;
@@ -899,44 +901,46 @@ if (this.cat)
 
   sleep_clicked: function()
   {
-    var sleep=1;
-    var normal=0;
-    var anim="sleeping_cat";
-    var bowl_close=0;
-    if (this.cat_sleep)
+    if (this.normal_mode || this.cat_sleep)
     {
-      sleep=0;
-      normal=1;
-      anim="cat_breathing";
+        var sleep=1;
+        var normal=0;
+        var anim="sleeping_cat";
+        var bowl_close=0;
+        if (this.cat_sleep)
+        {
+          sleep=0;
+          normal=1;
+          anim="cat_breathing";
+        }
+
+        if (this.food_opened && sleep)
+        {
+          bowl_close=1;
+        }
+
+        nu_sleep = this.achieve_state.times_slept+sleep;
+         var sender_dude=game_manager.get_player_name();
+          
+          var jesson =
+      {
+        sender:sender_dude,
+        cat_sleep:sleep,
+        cat_animation_loop:anim,
+        food_opened:bowl_close,
+        normal_mode:normal,
+        cat_sender:this.cat,
+        achieve_state:{times_slept:nu_sleep,},
+        // HERE 
+      };
+
+      var  txt = JSON.stringify(jesson);
+      if(game_manager.is_local())
+      {
+        game_manager.read_j(txt);
+      }
+      game_manager.send_j(txt);
     }
-
-    if (this.food_opened && sleep)
-    {
-      bowl_close=1;
-    }
-
-    nu_sleep = this.achieve_state.times_slept+sleep;
-     var sender_dude=game_manager.get_player_name();
-      
-      var jesson =
-  {
-    sender:sender_dude,
-    cat_sleep:sleep,
-    cat_animation_loop:anim,
-    food_opened:bowl_close,
-    normal_mode:normal,
-    cat_sender:this.cat,
-    achieve_state:{times_slept:nu_sleep,},
-    // HERE 
-  };
-
-  var  txt = JSON.stringify(jesson);
-  if(game_manager.is_local())
-  {
-    game_manager.read_j(txt);
-  }
-  game_manager.send_j(txt);
-
   },
   
   mouse_is_down: function()
@@ -1806,8 +1810,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   accept_food: function(accept,sender)
   {
 
- console.log("ZZZZZZZZZZJJJJJJJJJ");
-
     this.update_health(accept);
      $("#approve-img").attr("src","img/food-approve-img.png");
 
@@ -2039,8 +2041,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   decide_level: function()
   {
     levels_array=[0,100,300,600,1000]
-    level=0;
-    for(i = 0; i < levels_array.length; i++)
+    level=1;
+    for(i = 1; i <= levels_array.length; i++)
       {
         if (this.score>=levels_array[i])
         {
@@ -2089,7 +2091,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   {
     switch (this.level)
     {
-      case 1:
+      case 2:
       if (this.cat)
       {
         this.adjust_modal_to_choose_emoticons();        
@@ -2097,7 +2099,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       }
       break;
 
-      case 2:
+      case 3:
 
       this.add_modal('#fish-gift-modal');
 
@@ -2122,7 +2124,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
       break;
 
-      case 3:
+      case 4:
 
       break;
     }
@@ -2316,7 +2318,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
       score:0,
       health:100,
       health_proxy:100,
-      level:0,
+      level:1,
       food_opened:0,
       current_emoticons:{},
       possible_emoticons_list:{},

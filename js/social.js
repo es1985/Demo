@@ -1,8 +1,6 @@
 var friendCache = {};
 
 
-
-
 function listen_to_json ()
   {
        socket.on(friendCache.me.id, function(msg){ console.log("User ID Is "+ friendCache.me.id);
@@ -14,9 +12,25 @@ function read_j(msg)
 {
   console.log("MESSAGE ARRIVED");
   console.log(msg);
-  if (msg.game_status=="new") // -----> Data type!!!
+
+  console.log("Friends Friends")
+  console.log(friendCache.friends);
+
+  if (msg.player_first_entry)
+  {
+    friendCache.friends.data[friendCache.friends.data.length]=
+    {
+      first_name:msg.name.split(' ')[0],
+      id:msg.player_first_entry,
+      picture:msg.picture,
+      name:msg.name,
+    }
+    put_games_and_ingame_friends();
+  }
+  else if (msg.game_status=="new") // -----> Data type!!!
   { 
     console.log("Nu GAme Bitches");
+    console.log(msg);
 
     if ( friendCache.me.id == msg.game_id.split('_')[0])
       {var other_is_cat=1;
@@ -29,8 +43,12 @@ function read_j(msg)
 
         if ( (msg.cat_last_login && me_cat) || (msg.human_last_login && !me_cat))
             {
+              console.log("clickable gonna die "+me_cat)
               var click_able =0;
             }
+
+            if (friendCache.game_mates==undefined)
+              {friendCache.game_mates=[];}
 
       friendCache.game_mates[friendCache.game_mates.length]=
       {
@@ -39,6 +57,30 @@ function read_j(msg)
         game_id:msg.game_id,
         started:0,
         clickable:click_able
+      };
+
+      put_games_and_ingame_friends();
+  }
+  else if (msg.game_status=="started")
+  {
+
+    if ( friendCache.me.id == msg.game_id.split('_')[0])
+      {var other_is_cat=1;
+        var me_cat=0;}
+      else
+      {var other_is_cat=0; 
+        var me_cat=1;}
+
+     if (friendCache.game_mates==undefined)
+        {friendCache.game_mates=[];}
+
+      friendCache.game_mates[friendCache.game_mates.length]=
+      {
+        other_id:msg.game_id.split('_')[other_is_cat],
+        cat:me_cat,
+        game_id:msg.game_id,
+        started:1,
+        clickable:1,
       };
 
       put_games_and_ingame_friends();
@@ -62,10 +104,14 @@ function read_j(msg)
         {start=1;}
       else
         {
+          console.log("Cat Login is "+msg[i].cat_last_login+" and I am cat "+me_cat);
           if ( (msg[i].cat_last_login && me_cat) || (msg[i].human_last_login && !me_cat))
             {
               var click_able =0;
             }
+
+            if (msg[i].cat_last_login && msg[i].human_last_login)
+              { click_able =1;}
 
           start=0;
         }
@@ -85,13 +131,20 @@ function read_j(msg)
 
 function put_games_and_ingame_friends()
 {
-// console.log("HEjjj "+friendCache.got_ongoing_games+" - "+friendCache.got_ingame_friends);
- if (friendCache.got_ongoing_games && friendCache.got_ingame_friends)
+ console.log("putting games and friends");
+ console.log(friendCache.friends);
+
+// if (friendCache.got_ongoing_games && friendCache.got_ingame_friends)
+if (1==1)
  {
   $('.game-instance').remove();
   $('.in-game-friend-instance').remove();
-  putFriendsInGame();
-  putGames();
+  
+  if (friendCache.friends!=undefined)
+    {putFriendsInGame();}
+  if (friendCache.game_mates!=undefined)
+    {putGames();}
+ 
  }
 }
 
