@@ -83,7 +83,7 @@ var game_manager =
   modal_function_arg_cue:[],
   health_interval:250000,
   health_interval_while_asleep:50000,
-  my_id:0,
+  me_id:0,
   other_id:0,
   mouse_down:0,
   chat_opened:0,
@@ -464,7 +464,7 @@ change_displayed_cat_stage_to:
         displayed_cat_stage:"swiffycontainer",
         timeouts:{},
         game_id:0,
-        my_id:0,
+        me_id:0,
         other_id:0,
         scratch_mark:0,
         animations:{cat_stage:"",cat_hidden_stage:"",cat_hidden_stage2:""},
@@ -617,7 +617,7 @@ change_displayed_cat_stage_to:
     this.notifications=0;
 
     console.log("chat History");
-    
+
     for(i = jason.chat_history.length; i > 0; i--)
     {
       jason.chat_history[i-1][jason.json_content_type]=jason.json_content;
@@ -632,8 +632,11 @@ change_displayed_cat_stage_to:
         this.print_text(jason.chat_history[i-1].json_content,jason.chat_history[i-1].json_sender);
       }
 
-      if (!jason.chat_history[i-1].message_seen)
+
+
+      if (!jason.chat_history[i-1].message_seen && jason.chat_history[i-1].json_sender!=this.me_id)
       {
+              console.log("my ID "+this.me_id+" and this is from "+jason.chat_history[i-1].json_sender);
         this.notifications++;
       }
     }
