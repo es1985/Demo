@@ -12,7 +12,7 @@ left: 0;
 }
 
 body{
-background: url('../img/background.png');
+background: url('../img/backgrounds/background.png');
 background-size: cover;
 background-repeat: no-repeat;
 }
@@ -85,10 +85,18 @@ padding: 10px 0px 10px 10px;
 border-bottom: 1px solid #C4DCE8;
 }
 
+li.game-list-game:hover{
+background:rgba(196, 220, 232, 0.38);
+}
+
 a.games-list-partner-avatar{
 width: 45px;
 height: 45px;
 background: #eee;
+}
+
+a.games-list-partner-avatar img{
+border-radius: 2px;
 }
 
 li.games-list-head{
@@ -118,8 +126,10 @@ box-shadow: inset 0px 1px 0px rgba(255, 255, 255, 0.58), 0px 5px 1px rgba(13, 11
 }
 
 #choose_modal{
-top: 0!important;
-height: 90vh!important;
+top: 60px!important;
+padding: 20px;
+background: transparent;
+box-shadow: none;
 }
 
 a.games-list-partner-name{
@@ -149,9 +159,10 @@ top: 10px;
 .games-list-my-icon img{
 width: 30px;
 height: 30px;
+position: relative;
+top: 5px;
+right: 10px;
 }
-
-
 
 .message-modal{
 width: 90vw;
@@ -229,6 +240,7 @@ a.chat-trigger:hover{
 
 iframe.cat-animated-iframe{
 margin-left: -20px;
+z-index: 10;
 border: none;
 height: 100%;
 position: relative;
@@ -280,6 +292,7 @@ color: #000;
 
 a.main-score{
 position: fixed;
+z-index: 10;
 left: 3rem;
 top: .5rem;
 border-radius: 5px;
@@ -320,7 +333,7 @@ margin: 0px;
 
 span.achievement-name{
 position: relative;
-top: 12px;
+top: -6px;
 }
 
 span.achievement-icon img{
@@ -333,6 +346,11 @@ font-family: 'Chewy', cursive;
 font-size: 17px;
 border-bottom: 4px solid #15A2E8;
 padding: 10px;
+text-align: center;
+}
+
+span.not-achieved img{
+opacity:0.4;
 }
 
 p.modal-header{
@@ -343,6 +361,7 @@ padding: 20px;
 color: #4A4A4A;
 font-family: 'Chewy', cursive;
 font-size: 24px;
+margin-bottom: 0;
 }
 
 #points-drop:before{
@@ -358,6 +377,8 @@ span.achievement-points-points{
 display: block;
 font-size: 12px;
 }
+
+
 
 a.main-score i{
 color: #fff;
@@ -601,6 +622,7 @@ background: url('../img/choose-back.png');
 background-size: cover;
 background-repeat: no-repeat;
 }
+
 ul.choose-character{
 list-style: none;
 }
@@ -617,7 +639,14 @@ background: rgba(29, 141, 250, 1);
 width: 130px;
 height: 130px;
 box-shadow: 0px 2px 3px, inset 0px 1px 0px rgba(255, 255, 255, 0.35);
+transition: all 100ms ease-out;
 }
+
+ul.choose-character li p img:hover{
+transition: all 100ms ease-out;
+box-shadow:  0px 0px 0px 4px #000;
+} 
+
 h1.choose-title{
 text-shadow: 0px 4px 0px rgba(0, 0, 0, 0.31);
 font-family: 'Chewy', cursive;
@@ -798,6 +827,11 @@ font-family: 'Chewy', cursive;
 border: 4px solid;
 padding: 14px;
 border-radius: 100px;
+}
+
+#achieve-ok{
+position: absolute;
+top: 380px!important;
 }
 
 #levelModal a.approval-close{

@@ -99,91 +99,33 @@ JSON object to come out:
     <ul class="" style="list-style:none;margin:0px;">
     <li><p class="modal-header">Achievements</p></li>
     <li class="achievement-thread">
-      <ul class="next-achievements">
-        <li class="clearfix">
-          <span class="achievement-name left">getting comfi</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-hand.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
+      <ul id="achievement_list" class="next-achievements">
+        
+        <li id="food_once" class="clearfix">
+          <span class="achievement-name">Eater</span>
+          <span class="achievement-icon right not-achieved"><img src="img/achievements/food01.png">
         </li>
-        <li class="clearfix">
-          <span class="achievement-name left">first 24H</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-stars.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
+         <li id="slept_once" class="clearfix">
+          <span class="achievement-name">Sleeper</span>
+          <span class="achievement-icon right not-achieved"><img src="img/achievements/sleep01.png">
         </li>
-        <li class="clearfix">
-          <span class="achievement-name left">first week</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-cal.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
+         <li id="scratched_once" class="clearfix">
+          <span class="achievement-name">Scratcher</span>
+          <span class="achievement-icon right not-achieved"><img src="img/achievements/scratch01.png">
         </li>
-        <li class="clearfix">
-          <span class="achievement-name left">getting comfi</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-hand.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
+          <li id="stopped_scratching_once" class="clearfix">
+          <span class="achievement-name">Scratch Stopper</span>
+          <span class="achievement-icon right not-achieved"><img src="img/achievements/scratch-02.png">
         </li>
-        <li class="clearfix">
-          <span class="achievement-name left">first 24H</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-stars.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
+          <li id="revived_once" class="clearfix">
+          <span class="achievement-name">Back To Life</span>
+          <span class="achievement-icon right not-achieved"><img src="img/achievements/food02.png">
         </li>
-        <li class="clearfix">
-          <span class="achievement-name left">first week</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-cal.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
+         <li id="food_when_really_hungry" class="clearfix">
+          <span class="achievement-name">Savior</span>
+          <span class="achievement-icon right not-achieved"><img src="img/achievements/food02.png">
         </li>
-        <li class="clearfix">
-          <span class="achievement-name left">getting comfi</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-hand.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
-        </li>
-        <li class="clearfix">
-          <span class="achievement-name left">first 24H</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-stars.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
-        </li>
-        <li class="clearfix">
-          <span class="achievement-name left">first week</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-cal.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
-        </li>
-        <li class="clearfix">
-          <span class="achievement-name left">getting comfi</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-hand.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
-        </li>
-        <li class="clearfix">
-          <span class="achievement-name left">first 24H</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-stars.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
-        </li>
-        <li class="clearfix">
-          <span class="achievement-name left">first week</span>
-          <span class="achievement-icon right"><img src="img/achievement-list-cal.png">
-          <span class="achievement-points right">100
-            <span class="achievement-points-points">points</span>
-          </span>
-        </li>
+
       </ul>
     </li>
   </div>
@@ -194,6 +136,16 @@ JSON object to come out:
     <li class="cat-action cat-action-sleep"><button id="sleep_button" onclick="javascript:game_manager.sleep_clicked()"><i class="fa fa-moon-o"></i></button></li>
     <li class="cat-action cat-action-scratch" id="scratch_button" onclick="javascript:game_manager.scratch_clicked()"><button><i class="fa fa-paw"></i></button></li>
     <li id="food_bowl_button" class="cat-action cat-action-feedme"><a id="food_bowl_button" href="#" onclick="javascript:game_manager.food_bowl_button_clicked()"><img src="img/feedme.png"></a></li>
+    
+<!--
+    <li id="human-tools" class="cat-action human-cog">
+      <button onclick="javascript:game_manager.human_tools_clicked()"><i class="fa fa-cog"></i></button>
+    </li>
+-->
+<li class="cat-action human-cog" style="position:relative;top:40px;">
+      <button onclick="javascript:game_manager.human_tools_clicked()"><i class="fa fa-cog"></i></button>
+    </li>
+
   </ul>
   
   <a class="food-bowl" onclick="javascript:game_manager.food_bowl_clicked()" href="#"><img id="food-bowl-img" src="img/foodbal-empty.png"></a>
@@ -246,7 +198,7 @@ JSON object to come out:
       </li>
     </ul>
     <p class="text-center achieve-modal-img"><img id="achieve_image" src="img/achievments/sleep01.png"></p>
-    <a class="close-reveal-modal approval-close" id="">ok</a>
+    <a class="close-reveal-modal approval-close" id="achieve-ok">ok</a>
   </div>
 
       <!-- Achivement Modal -->
@@ -292,6 +244,41 @@ JSON object to come out:
       </div>
       <!-- level gist fish modal -->
 
+
+        <!-- Tools modal -->
+
+        <!--
+    <div id="tools-modal" class="reveal-modal" data-reveal>
+    <ul class="example-orbit" data-orbit>
+      <li id="house_background">
+        <img src="img/backgrounds/background.png" alt="House" />
+      </li>  
+       <li id="seventies_background">
+        <img src="img/backgrounds/70s.png" alt="Seventies" />
+      </li>  
+       <li id="seventies_background">
+        <img src="img/backgrounds/concrete.png" alt="Concrete" />
+      </li>  
+       <li id="seventies_background">
+        <img src="img/backgrounds/california.png" alt="California" />
+      </li>      
+    </ul>
+      -->
+
+    <div id="tools-modal" class="reveal-modal" data-reveal>
+    <ul class="small-block-grid-2">
+      <li onclick="javascript:game_manager.background_change_clicked('house')"><img src="img/backgrounds/background.png" alt="slide 1" /> </li>
+      <li onclick="javascript:game_manager.background_change_clicked('seventies')"><img src="img/backgrounds/70s.png" alt="slide 1" /> </li>
+      <li onclick="javascript:game_manager.background_change_clicked('concrete')"><img src="img/backgrounds/concrete.png" alt="slide 1" /> </li>
+      <li onclick="javascript:game_manager.background_change_clicked('california')"><img src="img/backgrounds/california.png" alt="slide 1" /> </li>
+    </ul>
+    <a class="close-reveal-modal">&#215;</a>
+  </div>
+
+
+
+  <!-- <a class="close-reveal-modal">&#215;</a> -->
+  </div>
 
 
       <!--<a href="#" class="the-cat"><img id="cat_avatar" src="img/cat.png"></a>-->
