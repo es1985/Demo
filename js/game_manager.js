@@ -252,7 +252,6 @@ change_displayed_cat_stage_to:
     
     if(jason.health)
     {
-          console.log("Reading Health at all?!? "+this.health);
       this.health_me(jason.health);
     }
 
@@ -449,7 +448,6 @@ change_displayed_cat_stage_to:
 
     adjust_achieve_modal: function(css_class_and_text)
     {
-      console.log("Adjusting Modal Thing to Achieve");
       $('#achive-modal').removeClass("achive-modal-sleep achive-modal-food achive-modal-chat achive-modal-scratch achive-modal-relationship-01");
       $('#achive-modal').addClass(css_class_and_text[0]);
       $('.achievment-modal-details').html(css_class_and_text[1]);
@@ -531,6 +529,8 @@ console.log("reached backs here is "+jason.game_state.reached_backgrounds);
 
 console.log("reached backs in THIS is ");
 console.log(this.reached_backgrounds);
+
+    
 
 
     this.game_id=sessionStorage.game_id;
@@ -618,12 +618,7 @@ console.log(this.reached_backgrounds);
     $("#score_number").html(this.score);
     $("#level").html(this.level);    
 
- console.log("Food Opened HERE "+this.food_opened);
-
-
     this.notifications=0;
-
-    console.log("chat History");
 
     for(i = jason.chat_history.length; i > 0; i--)
     {
@@ -639,11 +634,8 @@ console.log(this.reached_backgrounds);
         this.print_text(jason.chat_history[i-1].json_content,jason.chat_history[i-1].json_sender);
       }
 
-
-
       if (!jason.chat_history[i-1].message_seen && jason.chat_history[i-1].json_sender!=this.me_id)
       {
-              console.log("my ID "+this.me_id+" and this is from "+jason.chat_history[i-1].json_sender);
         this.notifications++;
       }
     }
@@ -672,15 +664,15 @@ console.log(this.reached_backgrounds);
     $('#cat_hidden_stage').css({'display':'none'});
     $('#cat_hidden_stage2').css({'display':'none'}) 
 
-    console.log("Current Emoti");
-    console.log(this.current_emoticons);
-
-
     this.possible_emoticons_list=get_possible_emoticons();
 
     this.initialized=1;
 
     this.adjust_health_pic();
+
+    this.change_background(this.current_background);
+
+
     //this.update_health(1);
     //this.update_notifications();
     
@@ -900,9 +892,8 @@ if (this.cat)
 
  configure_for_cat: function()
   {
-
     //this.player="Pips";
-    $('#human-tools').hide();
+ 
     $("#offered_food_image").attr("src",get_food_file("1"));
      
    // emoticon_array=['emo-happy','emo-mad','emo-food','emo-love','emo-night','emo-kania'];
@@ -911,7 +902,8 @@ if (this.cat)
 
    this.update_emoticon_html();
 
-   this.add_modal("#landingModal");
+   this.add_modal("#landingModal");     
+    $('#human-tools').hide();  
   },
 
   human_tools_clicked: function()
@@ -1116,7 +1108,7 @@ if (this.cat)
 
    caressing_end: function()
    {
-    alert("Ends");
+   // alert("Ends");
    },
 
    caressing_proposed: function()
@@ -1126,7 +1118,7 @@ if (this.cat)
 
    caressing_turned_down: function()
    {
-     alert("turned down");
+    // alert("turned down");
    },
 
    change_cat_display: function(stage_from,stage_to)
@@ -1177,13 +1169,12 @@ if (this.cat)
 
    food_bowl_clicked:function()
    {
-    console.log("Food clicked");
    // console.log(this.achievements_reached);
     if (this.cat)
     {
       if (!this.food_at_bowl)
       { 
-        alert("cat wants food");
+       // alert("cat wants food");
       }
       else
       {
@@ -1230,6 +1221,10 @@ if (this.cat)
   change_sleep: function(sleep)
   {
     this.cat_sleep=sleep;
+    if (this.cat_sleep)
+    {$('#cat_stage').removeClass('regular_placing').addClass('sleep_placing');}
+    else
+    {{$('#cat_stage').removeClass('sleep_placing').addClass('regular_placing');}}
   },
 
   add_emoticons: function(emotic_pack)
@@ -1247,9 +1242,7 @@ update_emoticon_html: function()
   var dumdum=0;
   dummy_emot_arr = [];
   $.each(this.current_emoticons, function(emotic_name,val){
-          
-      console.log("emoticon name " +emotic_name);
-
+        
     switch (dumdum)
     {
       case 0:
@@ -1397,6 +1390,11 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   change_scratch: function(scratching)
   {
     this.scratching=scratching;
+
+    if (this.scratching)
+    {$('#cat_stage').removeClass('regular_placing').addClass('scratch_placing');}
+    else
+    {{$('#cat_stage').removeClass('scratch_placing').addClass('regular_placing');}}
   },
 
   scratch_begin: function()
@@ -1454,23 +1452,26 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   scratch_image_clicked: function()
   {
-     new_scratch_mark= this.scratch_mark-1;
-     var sender_dude=game_manager.get_player_name();
-      var jesson =
-  {
-    sender:sender_dude,
-    scratch_mark:new_scratch_mark,
-    cat_sender:this.cat,
-  };
+    if (!this.cat)
+    {
+         new_scratch_mark= this.scratch_mark-1;
+         var sender_dude=game_manager.get_player_name();
+          var jesson =
+      {
+        sender:sender_dude,
+        scratch_mark:new_scratch_mark,
+        cat_sender:this.cat,
+      };
 
-  txt=JSON.stringify(jesson);
+      txt=JSON.stringify(jesson);
 
-    if(this.local)
-      {  
-        this.read_j(txt);
-      }
+        if(this.local)
+          {  
+            this.read_j(txt);
+          }
 
-      this.send_j(txt); 
+          this.send_j(txt); 
+    }
   },
 
   background_change_clicked: function(back)
@@ -1533,13 +1534,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
     // ----------::::::::>>>>>>>>>This should, at some point, be changed that the health is sent as JSON?
 
-    console.log("Cat eating food "+accept);
-    console.log("Health here is  "+this.health);
-
     this.update_health(accept);
-
-
-    console.log("After the update health is  "+this.health);
 
     $("#approve-img").attr("src","img/food-approve-img.png");
     $("#food_acceptor_text").html(" just had lunch!");
@@ -1914,7 +1909,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
   health_me: function(new_health)
   {
     this.health=new_health;
-    console.log("New Health Baby ! ! "+this.health);
     this.adjust_health_pic();
   },
 
@@ -2086,12 +2080,10 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   decide_level: function()
   {
-    console.log("LEVEL Decision on score "+ this.score);
     levels_array=[0,100,300,600,1000]
     level=1;
     for(i = 1; i <= levels_array.length; i++)
       {
-        console.log("Now going to level "+i);
         if (this.score>=levels_array[i-1])
         {
           level = i;
@@ -2112,23 +2104,18 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     {
       this.leveled_up(this.decide_level()-this.level);
     }
-    console.log("The level here is "+this.level+" and decided "+this.decide_level());
     $("#level").html(this.level);
   },
 
   change_score: function(change)
   {
-    console.log("Score Before change "+ this.score + " / "+ change);
     this.score=this.score+change;
     this.adjust_level();
     $("#score_number").html(this.score);
-  
-    console.log("Score After Change "+ this.score);
   },
 
   leveled_up: function(up)
   {
-    console.log("leveling up "+up)
     this.level=this.level+up;
     $('.level-modal-level').html(this.level)
     //this.close_all();
@@ -2183,8 +2170,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   adjust_modal_to_choose_emoticons: function()
   {
-    console.log("current emoticons here here");
-    console.log(this.current_emoticons);
   $.each(this.possible_emoticons_list, function(emotic_name,val){
      
       if(!game_manager.current_emoticons[emotic_name] || game_manager.current_emoticons[emotic_name]===undefined)
@@ -2297,7 +2282,6 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
        if (!this.achievements_reached.food_once)
        {
-        console.log("FOOOOOOD"+ this.achievements_reached.food_once);
 
         if (proxy.times_food>0)
         {
@@ -2413,12 +2397,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
    if (prop_name!="achieve_state" && prop_name!="achievements_reached" && prop_name!="achievements_seen")       
      {game_stats[prop_name]=jason.actions[prop_name];}
 
-   console.log("Action "+prop_name + " - " +jason.actions[prop_name]);
-
     });
-
-   console.log("Score");
-      console.log("this score: "+this.score+" jason "+jason.score);
 
     if (!jason.actions.score)
       {jason.actions.score =0;}
@@ -2430,8 +2409,13 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     game_stats.animations = JSON.stringify(game_stats.animations);
     game_stats.current_emoticons = JSON.stringify(game_stats.current_emoticons);  
     game_stats.possible_emoticons_list = JSON.stringify(game_stats.possible_emoticons_list); 
-    game_stats.reached_backgrounds = JSON.stringify(game_stats.reached_backgrounds);
+
+    if (typeof(game_stats.reached_backgrounds)!="string")
+    {game_stats.reached_backgrounds = JSON.stringify(game_stats.reached_backgrounds);}
     //game_stats.health_timer = JSON.stringify(game_stats.health_timer)
+
+    console.log("Reached Backs here are")
+    console.log(game_stats.reached_backgrounds);
 
    if (!txt.data_type)
     {
@@ -2626,31 +2610,38 @@ function get_cat_file(txt)
 function text_submitted()
 {
 
+
   var submitted_txt = $('#chat_text').val();
-  $('#chat_text').val("");
-  var sender_dude=game_manager.get_player_name();
-
-  if (game_manager.is_cat())
+  submitted_txt = submitted_txt.trim();
+  if (submitted_txt!="")
   {
-    submitted_txt=break_and_miau(submitted_txt);
-  }
+    $('#chat_text').val("");
+    var sender_dude=game_manager.get_player_name();
 
-  var jesson ={
-    text:submitted_txt,
-    sender:sender_dude,
-    data_type:"chat_message",
-    score:1,
-    notification:1,
-    cat_sender:game_manager.cat,
-    achieve_state:{times_messaged:game_manager.achieve_state.times_messaged+1},
-  };
-  var  txt = JSON.stringify(jesson);
-  if(game_manager.is_local())
-  { 
-    game_manager.read_j(txt);
-  } 
-  game_manager.send_j(txt);
+    if (game_manager.is_cat())
+    {
+      submitted_txt=break_and_miau(submitted_txt);
+    }
+
+    var jesson ={
+      text:submitted_txt,
+      sender:sender_dude,
+      data_type:"chat_message",
+      score:1,
+      notification:1,
+      cat_sender:game_manager.cat,
+      achieve_state:{times_messaged:game_manager.achieve_state.times_messaged+1},
+    };
+    var  txt = JSON.stringify(jesson);
+    if(game_manager.is_local())
+    { 
+      game_manager.read_j(txt);
+    } 
+    game_manager.send_j(txt);
+  }
 }
+
+
 
 function emoticon_clicked(emoti)
 {

@@ -243,6 +243,9 @@ function putFriendsInGame()
 
 function putInvitableFriends()
 {
+
+  // ----> Removing the list of invitable blablablabla. To re-indroduce it, uncomment this AND uncommment invite_list in index.html
+  /*
   for(i = 0; i < 10; i++)
   {
    //console.log(friendCache.invitable_friends.data[i]); +friendCache.invitable_friends.data[i].picture.data.url+  +friendCache.invitable_friends.data[i].name+
@@ -250,6 +253,7 @@ function putInvitableFriends()
    html_thing='<li class="game-list-game row clearfix" onclick="invite_this_one(&#39'+friendCache.invitable_friends.data[i].id+'&#39)"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.invitable_friends.data[i].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.invitable_friends.data[i].name+'</a><a class="clearfix games-list-my-icon right" href="#"></a></li>';
    $("#invite_list").append(html_thing);
   }
+  */
 }
 
 
@@ -319,6 +323,8 @@ function on_invite() {
     response.timestamp=$.now();
     response.date_time=new Date(response.timestamp);
     socket.emit("invite",response);
+    if (response.to)
+      {$('#invitation-modal').foundation('reveal', 'open');}
   });
 }
 
