@@ -88,18 +88,54 @@ JSON object to come out:
     <li>
       <a href="#" class="">
         <span class="top-left-points" data-dropdown="points-drop" aria-controls="points-drop" aria-expanded="false">
+          <i class="fa fa-caret-down"></i>
           Points:<span id="score_number">00</span>
         </span>
       </a>
     </li>
     <li>
-      <a href="#" id="levels" class="">
-        <span class="top-left-level">Level:
+     <a href="#" id="levels" data-dropdown="levels-drop" aria-controls="levels-drop" aria-expanded="false">
+        <span class="top-left-level">
+          <i class="fa fa-caret-down"></i>
+          Level:
           <span id="level">00</span>
         </span>
       </a>
+
     </li>
   </ul>
+
+<!-- levels drop -->
+  <div id="levels-drop" data-dropdown-content class="f-dropdown content" aria-hidden="true" tabindex="-1">
+    <ul class="" style="list-style:none;margin:0px;">
+    <li><p class="modal-header">Levels</p></li>
+    <li class="achievement-thread">
+      <ul class="next-achievements">
+        <li class="clearfix">
+          <span class="level-name left">1. getting comfi</span>
+          <span class="level-icon right"><img src="img/achievments/chat01.png">
+        </li>
+        <li class="clearfix">
+          <span class="level-name left">1. getting comfi</span>
+          <span class="level-icon right"><img src="img/achievments/chat01.png">
+        </li>
+        <li class="clearfix">
+          <span class="level-name left">1. getting comfi</span>
+          <span class="level-icon right"><img src="img/achievments/chat01.png">
+        </li>
+        <li class="clearfix">
+          <span class="level-name left">1. getting comfi</span>
+          <span class="level-icon right"><img src="img/achievments/chat01.png">
+        </li>
+        <li class="clearfix">
+          <span class="level-name left">1. getting comfi</span>
+          <span class="level-icon right"><img src="img/achievments/chat01.png">
+        </li>
+      </ul>
+    </li>
+  </div>
+  <!-- levels drop end -->
+
 
   <!-- achievements -->
  <div id="points-drop" data-dropdown-content class="f-dropdown content" aria-hidden="true" tabindex="-1">

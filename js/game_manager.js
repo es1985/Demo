@@ -29,7 +29,6 @@ var game_manager =
   current_background:"house",
   reached_backgrounds:{},
 
-
   displayed_cat_stage:"cat_stage",
   
   animations:{"cat_stage":"cat_breathing","cat_hidden_stage":"wanting_caress","cat_hidden_stage2":"caressing_going_on"},
@@ -351,6 +350,10 @@ change_displayed_cat_stage_to:
       this.change_background(jason.current_background);
     }
 
+    if (jason.current_emoticons)
+    {
+      this.update_current_emoticon(jason.current_emoticons);
+    }
     //this.check_achievements(jason.achieve_state);
   },
 
@@ -733,6 +736,7 @@ if (this.cat)
 // ---- > hide achievement thing
 
     $('#points-drop').hide();
+    $('#levels-drop').hide();
 
 // ---- > Bind modal cue
 
@@ -766,6 +770,11 @@ if (this.cat)
         game_manager.progress_cue();
       });
    
+    $('#fish-gift-modal').bind('closed', function() 
+      { 
+        game_manager.progress_cue();
+      });
+
    $('#tools-modal').bind('closed', function() 
       { 
         game_manager.progress_cue();
@@ -1233,6 +1242,26 @@ if (this.cat)
         game_manager.current_emoticons[emotic_name]=val;
     });
 
+  var jesson =
+  {
+    current_emoticons:JSON.stringify(this.current_emoticons),
+  };
+
+  txt=JSON.stringify(jesson);
+
+    if(this.local)
+      {  
+        this.read_j(txt);
+      }
+
+      this.send_j(txt);
+
+    //this.update_emoticon_html();
+  },
+
+  update_current_emoticon: function(emoticons_update)
+  {
+    this.current_emoticons=emoticons_update;
     this.update_emoticon_html();
   },
 
@@ -2164,12 +2193,22 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
       case 4:
 
+      if (this.cat)
+      {
+        this.adjust_modal_to_choose_emoticons(); 
+        this.add_modal('#levelgiftModal');
+      }
+      break;
+
+      case 5:
+
       break;
     }
   },
 
   adjust_modal_to_choose_emoticons: function()
   {
+    $('.emoticon-choice').remove();
   $.each(this.possible_emoticons_list, function(emotic_name,val){
      
       if(!game_manager.current_emoticons[emotic_name] || game_manager.current_emoticons[emotic_name]===undefined)

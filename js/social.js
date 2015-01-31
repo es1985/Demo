@@ -27,6 +27,38 @@ function read_j(msg)
     }
     put_games_and_ingame_friends();
   }
+  else if(msg.notifications_mainscreen)
+  {
+    console.log("NOTIFICATION");
+
+    if ( friendCache.me.id == msg.game_id.split('_')[0])
+    {
+      cat_man = 1;
+    }
+    else
+    {
+      cat_man = 0;
+    }
+
+    var not_idee = "#notifications_"+msg.game_id.split('_')[cat_man];
+    var user_idee = "user_"+msg.game_id.split('_')[cat_man]; 
+
+    for (i = 0 ; i <friendCache.game_mates.length ; i ++)
+    {
+      if (friendCache.game_mates[i].game_id = msg.game_id)
+      {
+        indx = i;
+        break;
+      }
+    }
+  friendCache.game_mates[indx].notifications++;
+  
+   var notifications_span_to_add = '<span id="notifications_num_'+String(friendCache.game_mates[indx].other_id)+'" class="notifications-number">'+friendCache.game_mates[indx].notifications+'</span>';
+   num_id='#notifications_num_'+String(friendCache.game_mates[indx].other_id);
+   span_id = '#notifications_span_'+String(friendCache.game_mates[indx].other_id);
+   $(num_id).remove();
+   $(span_id).append(notifications_span_to_add);
+  }
   else if (msg.game_status=="new") // -----> Data type!!!
   { 
     console.log("Nu GAme Bitches");
@@ -56,6 +88,7 @@ function read_j(msg)
         cat:me_cat,
         game_id:msg.game_id,
         started:0,
+        notifications:0,
         clickable:click_able
       };
 
@@ -80,14 +113,40 @@ function read_j(msg)
         cat:me_cat,
         game_id:msg.game_id,
         started:1,
+        notifications:0,
         clickable:1,
       };
 
       put_games_and_ingame_friends();
   }
-  else 
+  else if (msg[0]!=undefined && msg[0].messages_unseen)
   {
-    friendCache.game_mates= [];
+    if (msg[0].messages_unseen)
+    {
+      for (i=0 ; i <msg.length ; i++)
+      {
+        for(j=0 ; j<friendCache.game_mates.length ; j++)
+        {
+            if (friendCache.game_mates[j].game_id == msg[i].game_id)
+          {
+            var indx = j;
+            break;
+          }
+        }
+
+        friendCache.game_mates[indx].notifications = msg[i].messages_unseen;
+        var notifications_span_to_add = '<span id="notifications_num_'+String(friendCache.game_mates[indx].other_id)+'" class="notifications-number">'+friendCache.game_mates[indx].notifications+'</span>';
+        idee = '#notifications_span_'+String(friendCache.game_mates[indx].other_id);
+        $(idee).append(notifications_span_to_add);
+      }
+    }
+  }
+  else if(msg.games_list) 
+  {
+    msg = msg.result;
+    console.log("HERE FUCK FUYCK");
+    if (friendCache.game_mates==undefined)
+    {friendCache.game_mates= [];}
     for (i=0 ; i <msg.length ; i++)
     {
       if ( friendCache.me.id == msg[i].game_id.split('_')[0])
@@ -115,16 +174,21 @@ function read_j(msg)
 
           start=0;
         }
+
       friendCache.game_mates[i]= 
       {
         other_id:msg[i].game_id.split('_')[other_is_cat],
         cat:me_cat,
         game_id:msg[i].game_id,
+        notifications:msg[i].messages_unseen, // <------------ Where the notifications should be loaded fromt he DB
         started:start, // <------ CHANGE THE 'STARTED' THING LAGER
         clickable:click_able,
       }; 
           }
     friendCache.got_ongoing_games=1;
+
+    console.log("Game Mating");
+    console.log()
     put_games_and_ingame_friends();
   }
 }
@@ -134,6 +198,9 @@ function put_games_and_ingame_friends()
  console.log("putting games and friends");
  console.log(friendCache.friends);
 
+ console.log("Game Mates");
+ console.log(friendCache.game_mates);
+
 // if (friendCache.got_ongoing_games && friendCache.got_ingame_friends)
 if (1==1)
  {
@@ -142,7 +209,7 @@ if (1==1)
   
   if (friendCache.friends!=undefined)
     {putFriendsInGame();}
-  if (friendCache.game_mates!=undefined)
+  if (friendCache.game_mates!=undefined && friendCache.friends!=undefined)
     {putGames();}
  
  }
@@ -153,6 +220,7 @@ function putGames ()
 {
   for(i = 0; i < friendCache.game_mates.length ; i++)
   {
+
     for (j = 0 ; j<friendCache.friends.data.length ; j++ )
     {
       if (friendCache.game_mates[i].other_id==friendCache.friends.data[j].id)
@@ -173,6 +241,11 @@ function putGames ()
     if (!friendCache.game_mates[i].started)
     {
       is_pending='<div class="right games-list-item-status">pending</div>';
+      bell ="";
+    }
+    else
+    {
+      bell = '<i class="fa fa-bell">';
     }
     //id=friendCache.game_mates[i].other_id;
 //&#39'+i+'&#39
@@ -185,7 +258,14 @@ function putGames ()
 
   // id=&#39user_'+String(id)+'&#39
 
-   html_thing='<li class="game-list-game row clearfix game-instance" id="user_'+String(id)+'" onclick="load_game('+i+','+friendCache.game_mates[i].clickable+')"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[friendCache.game_mates[i].friend_index].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[friendCache.game_mates[i].friend_index].name+'</a><a class="clearfix games-list-my-icon right" href="#"><img class="left" src="'+choose_image+'">'+is_pending+'</a></li>';
+var notifications_span_to_add="";
+
+if (friendCache.game_mates[i].notifications)
+{
+  notifications_span_to_add = '<span id="notifications_num_'+String(friendCache.game_mates[i].other_id)+'" class="notifications-number">'+friendCache.game_mates[i].notifications+'</span>';
+}
+
+   html_thing='<li class="game-list-game row clearfix game-instance" id="user_'+String(id)+'" onclick="load_game('+i+','+friendCache.game_mates[i].clickable+')"><a class="games-list-partner-avatar left" href="#"><img src="'+friendCache.friends.data[friendCache.game_mates[i].friend_index].picture.data.url+'"></a><a class="games-list-partner-name left" href="#">'+friendCache.friends.data[friendCache.game_mates[i].friend_index].name+'</a><a class="clearfix games-list-my-icon right" href="#"><img class="left" src="'+choose_image+'">'+is_pending+'</a><span id="notifications_span_'+String(id)+'" class="game-notification-mainscreen right">'+bell+notifications_span_to_add+'</i></span></li>';
    $(html_id).remove();
    $("#available_friends_list").prepend(html_thing);
    friendCache.friends.data[friendCache.game_mates[i].friend_index].game_on=1;
