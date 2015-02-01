@@ -354,6 +354,11 @@ change_displayed_cat_stage_to:
     {
       this.update_current_emoticon(jason.current_emoticons);
     }
+
+    if (jason.reached_backgrounds)
+    {
+      this.update_current_backgrounds(jason.reached_backgrounds);
+    }
     //this.check_achievements(jason.achieve_state);
   },
 
@@ -523,17 +528,13 @@ change_displayed_cat_stage_to:
       else
         {this.achieve_state = jason.achieve_state;}
 
-console.log("reached backs here is "+jason.game_state.reached_backgrounds);
-
       if (typeof(jason.game_state.reached_backgrounds)=="string")
         {this.reached_backgrounds = JSON.parse(jason.game_state.reached_backgrounds);}
       else
         {this.reached_backgrounds = jason.game_state.reached_backgrounds;}
 
-console.log("reached backs in THIS is ");
-console.log(this.reached_backgrounds);
-
-    
+    console.log("REACHED HERE IS ");
+    console.log(this.reached_backgrounds);
 
 
     this.game_id=sessionStorage.game_id;
@@ -542,21 +543,24 @@ console.log(this.reached_backgrounds);
     //this.cat_id=parseInt(this.game_id.split('_')[1]);
     this.me_name = sessionStorage.me_name.split(' ')[0];
     this.other_name = sessionStorage.other_name.split(' ')[0];
-
        
     $.each(jason.game_state, function(prop_name,val){
-      if (!isNaN(parseInt(val)) && prop_name!="game_id")
+      if (!isNaN(parseInt(val)) && prop_name!="game_id" && prop_name!="reached_backgrounds")
       {
         game_manager[prop_name]=parseInt(val);
         //console.log("Init Stat "+ prop_name + " - "+ val);
+      }
+      else if (prop_name=="reached_backgrounds")
+      {
+
       }
       else
       {
         game_manager[prop_name]=val;
       }
 
-
     });
+
 
   /*
     $.each(this.animations, function(stage_name,anim){
@@ -681,6 +685,9 @@ console.log(this.reached_backgrounds);
     
 // ------->>>>> Death Simulation!!!! !!! !!! !!! !! !! !! !
 
+
+
+
 if (this.cat)
 {
   /*
@@ -693,6 +700,11 @@ if (this.cat)
 
        this.send_j(jason);
        */
+}
+else
+{
+  console.log("I AM HERE FUCKING SHIT");
+    this.update_current_backgrounds();
 }
 
   },
@@ -779,6 +791,12 @@ if (this.cat)
       { 
         game_manager.progress_cue();
       });
+
+   $('#background-gift-modal').bind('closed', function() 
+      { 
+        game_manager.progress_cue();
+      });
+
 
    // ------ > SOUND
     ion.sound({
@@ -911,7 +929,7 @@ if (this.cat)
 
    this.update_emoticon_html();
 
-   this.add_modal("#landingModal");     
+  // this.add_modal("#landingModal");     
     $('#human-tools').hide();  
   },
 
@@ -1157,6 +1175,51 @@ if (this.cat)
     clearTimeout(this.timeouts[stagee]);
   },
 
+  make_background_possible: function(background)
+  {
+    li_id = '#'+background+'_li';
+    $(li_id).css('opacity',1);
+    $(li_id).click(function(){
+      game_manager.background_change_clicked(background);
+    });
+  },
+
+  send_background_json: function(reached)
+  {
+    var jesson =
+      {
+        reached_backgrounds:reached,
+      }
+
+      var  txt = JSON.stringify(jesson);
+      if(game_manager.is_local())
+      {
+        game_manager.read_j(txt);
+      }
+      game_manager.send_j(txt);
+  },
+
+  update_current_backgrounds: function(reached)
+  { 
+    if (reached!=undefined)
+    {
+      if (typeof(reached)=='string')
+      {this.reached_backgrounds = JSON.parse(reached);}
+      else
+      {this.reached_backgrounds=reached;}
+    }
+
+    //this.reached_backgrounds={};
+
+    if (JSON.stringify(this.reached_backgrounds)!='{}')
+    {
+     
+         $.each(game_manager.reached_backgrounds, function(back,val){
+            game_manager.make_background_possible(back);
+            //console.log(back+" is the new THANG");
+        });
+    }
+  },
 
    open_close_food_bowl: function(opened)
    {
@@ -1244,7 +1307,7 @@ if (this.cat)
 
   var jesson =
   {
-    current_emoticons:JSON.stringify(this.current_emoticons),
+    current_emoticons:this.current_emoticons,
   };
 
   txt=JSON.stringify(jesson);
@@ -1261,6 +1324,8 @@ if (this.cat)
 
   update_current_emoticon: function(emoticons_update)
   {
+    if (typeof(emoticons_update)=='string')
+      {emoticons_update = JSON.parse(emoticons_update);}
     this.current_emoticons=emoticons_update;
     this.update_emoticon_html();
   },
@@ -1505,6 +1570,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   background_change_clicked: function(back)
   { 
+
     var jesson =
     {
      current_background:back,
@@ -1519,7 +1585,8 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     }
       
     this.send_j(txt); 
-    
+      
+      $('#tools-modal').foundation('reveal', 'close');
   },
 
   change_background: function(back)
@@ -2109,7 +2176,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   decide_level: function()
   {
-    levels_array=[0,100,300,600,1000]
+    levels_array=[0,100,300,500,750,1000,1250]
     level=1;
     for(i = 1; i <= levels_array.length; i++)
       {
@@ -2193,14 +2260,52 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
       case 4:
 
-      if (this.cat)
-      {
-        this.adjust_modal_to_choose_emoticons(); 
-        this.add_modal('#levelgiftModal');
-      }
+        if(!this.cat)
+        {
+          reached={"house":1,"seventies":1};
+          this.send_background_json(reached);
+        }
+
+        this.add_modal("#background-gift-modal");
       break;
 
       case 5:
+        
+        if (this.cat)
+        {
+          this.adjust_modal_to_choose_emoticons(); 
+          this.add_modal('#levelgiftModal');
+        }
+        break;
+
+        case 6:
+        if (!this.cat)
+        {
+          reached={"house":1,"seventies":1,"concrete":1};
+          this.send_background_json(reached);
+        }
+         this.add_modal("#background-gift-modal");
+      break;
+
+      case 7:
+
+
+        if (this.cat)
+        {
+          this.adjust_modal_to_choose_emoticons(); 
+          this.add_modal('#levelgiftModal');
+        }
+
+      break;
+
+      case 8:
+
+     if (!this.cat)
+        {
+          reached={"house":1,"seventies":1,"concrete":1,"california":1};
+          this.send_background_json(reached);
+        }
+         this.add_modal("#background-gift-modal");
 
       break;
     }

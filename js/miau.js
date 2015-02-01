@@ -156,7 +156,7 @@ function random_mau(txt)
     {
         return(turn_to_miau(txt));
     }
-    else if (num<80)
+    else if (num<60)
     {
         return(turn_to_meow(txt));
     }

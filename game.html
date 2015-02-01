@@ -280,12 +280,25 @@ JSON object to come out:
       <div id="fish-gift-modal" class="message-modal level-gift-modal level-gift-fish reveal-modal" data-reveal>
         <ul class="inline-list message-modal-header">
           <li><i class="fa fa-trophy"></i></li>
-          <li><p class="lead">new gift! fish</p></li>
+          <li><p class="lead">New Gift! Fish!</p></li>
         </ul>
         <p class="text-center level-modal-img"><img src="img/gift-fish.png"></p>
         <a class="close-reveal-modal approval-close level-gift-close" id="">ok</a>
       </div>
       <!-- level gist fish modal -->
+
+  <!-- level gift fish modal -->
+      <div id="background-gift-modal" class="message-modal level-gift-modal level-gift-fish reveal-modal" data-reveal>
+        <ul class="inline-list message-modal-header">
+          <li><i class="fa fa-trophy"></i></li>
+          <li><p class="lead">New Gift! New Room Design!</p></li>
+        </ul>
+        <p class="text-center level-modal-img"><img src="img/background-gift-modal.png"></p>
+        <a class="close-reveal-modal approval-close level-gift-close" id="">ok</a>
+      </div>
+      <!-- level gist fish modal -->
+
+
 
 
         <!-- Tools modal -->
@@ -310,10 +323,10 @@ JSON object to come out:
 
     <div id="tools-modal" class="reveal-modal" data-reveal>
     <ul class="small-block-grid-2">
-      <li onclick="javascript:game_manager.background_change_clicked('house')"><img src="img/backgrounds/background.png" alt="slide 1" /> </li>
-      <li onclick="javascript:game_manager.background_change_clicked('seventies')"><img src="img/backgrounds/70s.png" alt="slide 1" /> </li>
-      <li onclick="javascript:game_manager.background_change_clicked('concrete')"><img src="img/backgrounds/concrete.png" alt="slide 1" /> </li>
-      <li onclick="javascript:game_manager.background_change_clicked('california')"><img src="img/backgrounds/california.png" alt="slide 1" /> </li>
+      <li id="house_li" onclick="javascript:game_manager.background_change_clicked('house')"><img src="img/backgrounds/background.png" alt="slide 1" /> </li>
+      <li id="seventies_li" style="opacity:0.5;" ><img src="img/backgrounds/70s.png" alt="slide 1" /> </li>
+      <li id="concrete_li" style="opacity:0.5;"><img src="img/backgrounds/concrete.png" alt="slide 1" /> </li>
+      <li id="california_li" style="opacity:0.5;"><img src="img/backgrounds/california.png" alt="slide 1" /> </li>
     </ul>
     <a class="close-reveal-modal">&#215;</a>
   </div>

@@ -45,12 +45,15 @@ function read_j(msg)
 
     for (i = 0 ; i <friendCache.game_mates.length ; i ++)
     {
-      if (friendCache.game_mates[i].game_id = msg.game_id)
+      if (friendCache.game_mates[i].game_id == msg.game_id)
       {
         indx = i;
         break;
       }
     }
+    if (friendCache.game_mates[indx].notifications==undefined)
+      {friendCache.game_mates[indx].notifications=0;}
+
   friendCache.game_mates[indx].notifications++;
   
    var notifications_span_to_add = '<span id="notifications_num_'+String(friendCache.game_mates[indx].other_id)+'" class="notifications-number">'+friendCache.game_mates[indx].notifications+'</span>';

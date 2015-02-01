@@ -190,29 +190,25 @@ right: 5px;
 
 .game-notification-mainscreen{
 position: relative;
-top: 0px;
+top: 10px;
 left: -20px;
 }
 
 .game-notification-mainscreen i.fa-bell{
 font-size: 19px;
 position: relative;
-left: 10px;
-top: 10px;
 color: #20ABFF;
 }
 
 span.notifications-number{
 background: #FF1D25;
 color: #fff;
-width: 20px;
-height: 20px;
 padding-left: 5px;
-padding-top: 3px;
 font-size: 10px;
 border-radius: 100px;
 position: absolute;
 left: 6px;
+padding: 2px;
 top: -10px;
 border: 2px solid #fff;
 }
@@ -649,16 +645,27 @@ food modal
 top: 5vw;
 width: 90vw;
 left: 5vw;
+background: #20ABFF;
+border: none;
+padding-bottom: 0;
+
 }
 
-p.lead{
+#foodModal p.lead{
 font-family: 'Chewy', cursive;
 text-align: center;
 color: #009EFF;
+display: none;
+}
+
+p.lead{
+font-family: 'Chewy', cursive!important;
+text-align: center!important;
+color: #009EFF!important;
 }
 
 p.food-type-cat img{
-width: 50%;
+width: 100%;
 }
 
 p.food-type-cat{
@@ -666,17 +673,37 @@ text-align: center;
 }
 
 button.red-x{
-background: #FF1D25;
+text-align: center;
+color: rgba(13, 113, 210, 1);
+font-size: 1.5rem;
+background: transparent;
+border-radius: 3px;
+/* margin-bottom: 20px; */
+padding: 12px 10px;
+box-shadow: inset 0px 0px 0px 2px rgba(13, 113, 210, 1);
 position: relative;
 left: -2px;
-margin-bottom: 0;
+}
+
+button.red-x:hover{
+background: rgba(13, 113, 210, 1);
+color: #fff;
 }
 
 button.green-y{
-background: #39B54A;
+text-align: center;
+color: #FFFFFF;
+font-size: 1.5rem;
+background: rgba(29, 141, 250, 1);
+border-radius: 3px;
+padding: 10px;
+box-shadow: 0px 5px 0px rgba(13, 113, 210, 1);
 position: relative;
 right: -2px;
-margin-bottom: 0;
+}
+
+button.green-y:hover{
+background: rgba(13, 113, 210, 1);
 }
 
 .food-buttons-cat{
@@ -898,6 +925,20 @@ right: 6.2rem!important;
 color: #fff!important;
 }
 
+#tools-modal{
+padding-top: 20px;
+height: 100vh;
+padding: 20px;
+background: rgba(0, 0, 0, 0.46);
+border: none;
+}
+
+#tools-modal li img:hover{
+box-shadow: 0px 0px 0px 2px #fff;
+border-radius: 2px;
+}
+
+
 /***************************
 cat stages
 ***************************/
@@ -980,6 +1021,16 @@ bottom: 30px;
 width: 50%;
 left:-50vw;
 z-index: 6;
+}
+
+a.food-bowl:hover{
+background: -moz-radial-gradient(center, ellipse cover,  rgba(255,255,50,1) 0%, rgba(230,230,220,0.01) 73%, rgba(229,229,229,0.01) 77%); /* FF3.6+ */
+background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,rgba(255,255,50,1)), color-stop(73%,rgba(230,230,220,0.01)), color-stop(77%,rgba(229,229,229,0.01))); /* Chrome,Safari4+ */
+background: -webkit-radial-gradient(center, ellipse cover,  rgba(255,255,50,1) 0%,rgba(230,230,220,0.01) 73%,rgba(229,229,229,0.01) 77%); /* Chrome10+,Safari5.1+ */
+background: -o-radial-gradient(center, ellipse cover,  rgba(255,255,50,1) 0%,rgba(230,230,220,0.01) 73%,rgba(229,229,229,0.01) 77%); /* Opera 12+ */
+background: -ms-radial-gradient(center, ellipse cover,  rgba(255,255,50,1) 0%,rgba(230,230,220,0.01) 73%,rgba(229,229,229,0.01) 77%); /* IE10+ */
+background: radial-gradient(ellipse at center,  rgba(255,255,50,1) 0%,rgba(230,230,220,0.01) 73%,rgba(229,229,229,0.01) 77%); /* W3C */
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffff32', endColorstr='#03e5e5e5',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
 }
 
 /***************************
