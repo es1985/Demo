@@ -218,7 +218,6 @@ if (1==1)
  }
 }
 
-
 function putGames ()
 {
   for(i = 0; i < friendCache.game_mates.length ; i++)

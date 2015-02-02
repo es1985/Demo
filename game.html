@@ -25,6 +25,17 @@
   document.domain="catpips.com";
   </script>
 
+<!-- google analitycs-->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-59248958-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
 
 </head>
 <body>    
@@ -40,7 +51,7 @@ JSON object to come out:
 <div class="row full-height">
 
 
-  <a id="clickable" href="#" style='width: 100%;
+  <a id="clickable" href="#" onclick="game_manager.cat_clicked()" style='width: 100%;
   height: 44%;
   background: transparent;
   position: absolute;
@@ -112,24 +123,32 @@ JSON object to come out:
     <li class="achievement-thread">
       <ul class="next-achievements">
         <li class="clearfix">
-          <span class="level-name left">1. getting comfi</span>
-          <span class="level-icon right"><img src="img/achievments/chat01.png">
+          <span class="level-name left">1. Feeling comfi!</span>
+          <span class="level-icon right"><img src="img/emoticons/pack-icon.png">
         </li>
         <li class="clearfix">
-          <span class="level-name left">1. getting comfi</span>
-          <span class="level-icon right"><img src="img/achievments/chat01.png">
+          <span class="level-name left">2. Golden age!</span>
+          <span class="level-icon right"><img src="img/gift-fish.png">
         </li>
         <li class="clearfix">
-          <span class="level-name left">1. getting comfi</span>
-          <span class="level-icon right"><img src="img/achievments/chat01.png">
+          <span class="level-name left">3. Great Partners!</span>
+          <span class="level-icon right"><img src="img/background-gift-modal.png">
         </li>
         <li class="clearfix">
-          <span class="level-name left">1. getting comfi</span>
-          <span class="level-icon right"><img src="img/achievments/chat01.png">
+          <span class="level-name left">4. You Rock!</span>
+          <span class="level-icon right"><img src="img/emoticons/pack-icon.png">
         </li>
         <li class="clearfix">
-          <span class="level-name left">1. getting comfi</span>
-          <span class="level-icon right"><img src="img/achievments/chat01.png">
+          <span class="level-name left">5. Home Designers</span>
+          <span class="level-icon right"><img src="img/background-gift-modal.png">
+        </li>
+        <li class="clearfix">
+          <span class="level-name left">6. You Rock!</span>
+          <span class="level-icon right"><img src="img/emoticons/pack-icon.png">
+        </li>
+        <li class="clearfix">
+          <span class="level-name left">7. Home Designers</span>
+          <span class="level-icon right"><img src="img/background-gift-modal.png">
         </li>
       </ul>
     </li>
@@ -148,6 +167,11 @@ JSON object to come out:
           <span class="achievement-name">Eater</span>
           <span class="achievement-icon right not-achieved"><img src="img/achievements/food01.png">
         </li>
+          <li id="food_seven_times" class="clearfix">
+          <span class="achievement-name">Big Eater</span>
+          <span class="achievement-icon right not-achieved"><img src="img/achievements/food-03.png">
+        </li>
+
          <li id="slept_once" class="clearfix">
           <span class="achievement-name">Sleeper</span>
           <span class="achievement-icon right not-achieved"><img src="img/achievements/sleep01.png">
@@ -237,7 +261,7 @@ JSON object to come out:
       <div id="achive-modal" class="message-modal reveal-modal" data-reveal>
     <ul class="message-modal-header">
       <li>
-        <p class="lead">achiement locked! <span class="achievment-modal-details">sleep 1st time</span></p>
+        <p class="lead">Achievement! <span class="achievment-modal-details">sleep 1st time</span></p>
       </li>
     </ul>
     <p class="text-center achieve-modal-img"><img id="achieve_image" src="img/achievments/sleep01.png"></p>
@@ -408,7 +432,6 @@ JSON object to come out:
 
   <script>
   $(document).foundation('');
-
   </script>
 
   <script>

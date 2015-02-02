@@ -64,8 +64,9 @@ var game_manager =
                             slept_once:["achive-modal-sleep","Sleepy Cat","img/achievements/sleep01.png"],
                             scratched_once:["achive-modal-scratch","Naughty Cat","img/achievements/scratch01.png"],
                             stopped_scratching_once:["achive-modal-scratch","Aware Human","img/achievements/scratch-02.png"],
-                            revived_once:["achive-modal-scratch","Replacing Revival","img/achievements/food02.png"],
-                            food_when_really_hungry:["achive-modal-food","Replacement Food When Really Hungry","img/achievements/food-03.png"],
+                            revived_once:["achive-modal-scratch","Cured The Cat!","img/achievements/food02.png"],
+                            food_when_really_hungry:["achive-modal-food","Food Just In Time","img/achievements/food-03.png"],
+                            food_seven_times:["achive-modal-food","Seven Times Yummy","img/achievements/food-03.png"],
                           },
 
   background_dictionary:{
@@ -360,6 +361,14 @@ change_displayed_cat_stage_to:
       this.update_current_backgrounds(jason.reached_backgrounds);
     }
     //this.check_achievements(jason.achieve_state);
+  },
+
+  read_outside_j: function(jason)
+  {
+    if (jason.player_first_entry)
+    {
+
+    }
   },
 
 
@@ -1442,7 +1451,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
   cat_clicked: function() // DEPRECIATED !!!!! ! !!!! !! 
   {
-    if (!this.dead)
+    if (!this.dead && this.normal_mode)
     {
       //ion.sound.play("water_droplet");
       this.send_animation_plus_loop('eyes_twitch','cat_breathing',1000,"water_droplet");
@@ -2426,10 +2435,18 @@ put_animaiton_loop: function(anim,sent_sound,stage)
 
        if (!this.achievements_reached.food_once)
        {
-
         if (proxy.times_food>0)
         {
           jason=this.nu_achievement(jason,"food_once");
+        }
+       }
+
+
+       if (!this.achievements_reached.food_seven_times)
+       {
+        if (proxy.times_food>6)
+        {
+          jason=this.nu_achievement(jason,"food_seven_times");
         }
        }
 
@@ -2637,6 +2654,7 @@ put_animaiton_loop: function(anim,sent_sound,stage)
     {
      // this.socket.on(this.game_id, function(msg){game_manager.read_j(msg);});
        this.socket.on(String(this.game_id), function(msg){game_manager.read_j(msg);});
+       this.socket.on(String(this.me_id), function(msg){game_manager.read_outside_j(msg);});
     }
   }
 
